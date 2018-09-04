@@ -105,6 +105,10 @@ public class Steps {
             steps.add(start);
         }
 
+        public StepsBuilder() {
+            steps = new ArrayList<>();
+        }
+
         public StepsBuilder addUrlStep(String url) {
             try {
                 steps.add(new Step(url, true));
