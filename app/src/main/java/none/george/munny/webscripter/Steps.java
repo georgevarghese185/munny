@@ -60,7 +60,7 @@ public class Steps {
         }
 
         void execute(WebView webView) {
-            new Handler(Looper.getMainLooper()).post(() -> {
+            runOnUiThread(() -> {
                 if(isUrlCommand) {
                     webView.loadUrl(command);
                 } else {
@@ -124,5 +124,9 @@ public class Steps {
         public Steps build() {
             return new Steps(this.steps);
         }
+    }
+
+    private static void runOnUiThread(Runnable runnable) {
+        new Handler(Looper.getMainLooper()).post(runnable);
     }
 }
