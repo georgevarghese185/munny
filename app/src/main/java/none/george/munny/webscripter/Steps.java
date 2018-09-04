@@ -45,7 +45,7 @@ public class Steps {
             currentStep = stepNumber;
             steps.get(stepNumber).execute(webView);
         } else {
-            completeListener.onComplete(result);
+            runOnUiThread(() -> completeListener.onComplete(result));
         }
     }
 
