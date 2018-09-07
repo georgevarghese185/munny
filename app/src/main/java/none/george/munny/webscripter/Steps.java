@@ -45,9 +45,11 @@ public class Steps {
             currentStep = stepNumber;
             steps.get(stepNumber).execute(webView);
         } else {
-            webView.removeJavascriptInterface(INTERFACE_NAME);
-            webView.setWebViewClient(null);
-            runOnUiThread(() -> completeListener.onComplete(result));
+            runOnUiThread(() -> {
+                webView.removeJavascriptInterface(INTERFACE_NAME);
+                webView.setWebViewClient(null);
+                completeListener.onComplete(result);
+            });
         }
     }
 
