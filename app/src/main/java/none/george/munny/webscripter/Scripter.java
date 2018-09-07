@@ -1,7 +1,6 @@
 package none.george.munny.webscripter;
 
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.webkit.JavascriptInterface;
@@ -11,7 +10,7 @@ import android.webkit.WebViewClient;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Steps {
+public class Scripter {
     public static final String INTERFACE_NAME = "StepInterface";
 
     private List<Step> steps;
@@ -23,7 +22,7 @@ public class Steps {
         void onComplete(@Nullable String result);
     }
 
-    private Steps(List<Step> steps) {
+    private Scripter(List<Step> steps) {
         this.steps = steps;
     }
 
@@ -129,8 +128,8 @@ public class Steps {
             }
         }
 
-        public Steps build() {
-            return new Steps(this.steps);
+        public Scripter build() {
+            return new Scripter(this.steps);
         }
     }
 

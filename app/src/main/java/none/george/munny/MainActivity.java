@@ -3,13 +3,7 @@ package none.george.munny;
 import android.annotation.SuppressLint;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
-
-import none.george.munny.webscripter.Steps;
-
-import static none.george.munny.webscripter.Steps.INTERFACE_NAME;
 
 public class MainActivity extends AppCompatActivity {
     private WebView webView;
