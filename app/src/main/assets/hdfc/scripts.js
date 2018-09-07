@@ -36,3 +36,13 @@ var anchors = Array.from(document.getElementsByTagName("a"));
 var continueButton = anchors.filter(a => a.getAttribute("onclick") && a.getAttribute("onclick").match(/fireOtp\(\)/))[0];
 continueButton.click();
 //end
+
+
+//submit_otp
+var otpField = document.getElementsByName("fldOtpToken")[0];
+otpField.value = "{{otp}}";
+var anchors = Array.from(document.getElementsByTagName("a"));
+var continueButton = anchors.filter(a => a.getAttribute("onclick") && a.getAttribute("onclick").match(/authOtp\(\)/))[0];
+continueButton.click();
+//end
+
