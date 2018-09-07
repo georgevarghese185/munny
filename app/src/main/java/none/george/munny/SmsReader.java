@@ -10,11 +10,12 @@ import android.provider.Telephony.Sms.Inbox;
 import android.support.v4.content.ContextCompat;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class SmsReader {
 
-    public static void getSms(Context context, long newerThan, Listener<ArrayList<String>> listener) {
+    public static void getSms(Context context, long newerThan, Listener<List<String>> listener) {
         if(!hasSmsPermission(context)) {
             new Handler(Looper.getMainLooper()).post(() ->
                     listener.error(new IllegalStateException("SMS Permission not granted")));
