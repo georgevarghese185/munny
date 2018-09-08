@@ -230,7 +230,7 @@ public class WebUIActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if(requestCode == SMS_REQUEST_CODE) {
-            if(permissions.length > 1 && permissions[0].equals(Manifest.permission.READ_SMS)
+            if(permissions.length > 0 && permissions[0].equals(Manifest.permission.READ_SMS)
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 getSms(smsNewerThan, smsCallback);
             } else {

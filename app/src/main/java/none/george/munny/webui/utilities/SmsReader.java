@@ -28,7 +28,7 @@ public class SmsReader {
             ArrayList<String> messages = new ArrayList<>();
 
             Cursor cursor = context.getContentResolver().query(Inbox.CONTENT_URI,
-                    new String[]{Inbox.ADDRESS, Inbox.BODY},
+                    new String[]{Inbox.ADDRESS, Inbox.BODY, Inbox.DATE},
                     Inbox.DATE + " >= ?",
                     new String[]{String.valueOf(newerThan)},
                     null);
