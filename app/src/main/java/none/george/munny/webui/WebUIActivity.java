@@ -125,7 +125,7 @@ public class WebUIActivity extends AppCompatActivity {
 
 
     @JavascriptInterface
-    private void getSms(long newerThan, String callback) {
+    public void getSms(long newerThan, String callback) {
         if(!SmsReader.hasSmsPermission(this)) {
             smsCallback = callback;
             smsNewerThan = newerThan;
