@@ -131,13 +131,17 @@ public class WebUIActivity extends AppCompatActivity {
             smsNewerThan = newerThan;
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_SMS}, SMS_REQUEST_CODE);
         } else {
-            SmsReader.getSms(this, newerThan, new Listener<List<String>>() {
+            SmsReader.getSms(this, newerThan, new Listener<List<SmsReader.Sms>>() {
                 @Override
-                public void on(List<String> result) {
+                public void on(List<SmsReader.Sms> result) {
                     try {
                         JSONArray smsArray = new JSONArray();
-                        for (String sms : result) {
-                            smsArray.put("'" + sms + "'");
+                        for (SmsReader.Sms sms : result) {
+                            JSONObject smsObj = new JSONObject();
+                            smsObj.put("from", sms.from);
+                            smsObj.put("date", sms.date);
+                            smsObj.put("body", sms.body);
+                            smsArray.put(smsObj);
                         }
                         callback(callback, smsArray.toString());
                     } catch (Exception e) {

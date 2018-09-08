@@ -17,7 +17,19 @@ import none.george.munny.Listener;
 
 public class SmsReader {
 
-    public static void getSms(Context context, long newerThan, Listener<List<String>> listener) {
+    public static class Sms {
+        public final String from;
+        public final long date;
+        public final String body;
+
+        public Sms(String from, long date, String body) {
+            this.from = from;
+            this.date = date;
+            this.body = body;
+        }
+    }
+
+    public static void getSms(Context context, long newerThan, Listener<List<Sms>> listener) {
         if(!hasSmsPermission(context)) {
             new Handler(Looper.getMainLooper()).post(() ->
                     listener.error(new IllegalStateException("SMS Permission not granted")));
@@ -25,7 +37,7 @@ public class SmsReader {
         }
 
         new Thread(() -> {
-            ArrayList<String> messages = new ArrayList<>();
+            ArrayList<Sms> messages = new ArrayList<>();
 
             Cursor cursor = context.getContentResolver().query(Inbox.CONTENT_URI,
                     new String[]{Inbox.ADDRESS, Inbox.BODY, Inbox.DATE},
@@ -40,8 +52,7 @@ public class SmsReader {
                     String body = cursor.getString(cursor.getColumnIndex(Inbox.BODY));
                     long date = cursor.getLong(cursor.getColumnIndex(Inbox.DATE));
 
-                    String message = String.format("%s:%s:%s", address, body, String.valueOf(date));
-                    messages.add(message);
+                    messages.add(new Sms(address, date, body));
                 } while (cursor.moveToNext());
 
                 cursor.close();
