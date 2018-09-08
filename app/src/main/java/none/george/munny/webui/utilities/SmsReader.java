@@ -1,4 +1,4 @@
-package none.george.munny;
+package none.george.munny.webui.utilities;
 
 import android.Manifest;
 import android.content.Context;
@@ -11,6 +11,8 @@ import android.support.v4.content.ContextCompat;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import none.george.munny.Listener;
 
 
 public class SmsReader {
@@ -49,7 +51,7 @@ public class SmsReader {
         }).start();
     }
 
-    private static boolean hasSmsPermission(Context context) {
+    public static boolean hasSmsPermission(Context context) {
         return ContextCompat.checkSelfPermission(context, Manifest.permission.READ_SMS) == PackageManager.PERMISSION_GRANTED;
     }
 }

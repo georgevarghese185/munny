@@ -21,20 +21,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Scripter {
-    public static final String INTERFACE_NAME = "StepInterface";
+public class Script {
+    public static final String INTERFACE_NAME = "Interface";
 
     private List<Step> steps;
     private WebView webView;
     private CompleteListener completeListener;
     private int currentStep;
     private List<String> resultAccumulator;
+    private boolean canceled = false;
 
     public interface CompleteListener {
         void onComplete(List<String> resultAccumulator);
     }
 
-    private Scripter(List<Step> steps) {
+    private Script(List<Step> steps) {
         this.steps = steps;
         resultAccumulator = new ArrayList<>();
     }
@@ -53,7 +54,7 @@ public class Scripter {
     }
 
     private void executeStep(int stepNumber) {
-        if(stepNumber < steps.size()) {
+        if(stepNumber < steps.size() && !canceled) {
             currentStep = stepNumber;
             steps.get(stepNumber).execute(webView);
         } else {
@@ -61,7 +62,8 @@ public class Scripter {
         }
     }
 
-    private void end() {
+    public void end() {
+        canceled = true;
         runOnUiThread(() -> {
             webView.removeJavascriptInterface(INTERFACE_NAME);
             webView.setWebViewClient(null);
@@ -167,8 +169,8 @@ public class Scripter {
             }
         }
 
-        public Scripter build() {
-            return new Scripter(this.steps);
+        public Script build() {
+            return new Script(this.steps);
         }
     }
 
