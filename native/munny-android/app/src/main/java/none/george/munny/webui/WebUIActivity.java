@@ -1,6 +1,9 @@
 package none.george.munny.webui;
 
 import android.Manifest;
+import android.app.KeyguardManager;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.support.annotation.NonNull;
@@ -29,12 +32,15 @@ import none.george.munny.Listener;
 import none.george.munny.R;
 import none.george.munny.webscripter.Script;
 import none.george.munny.webscripter.WebScripter;
+import none.george.munny.webui.utilities.Secrets;
 import none.george.munny.webui.utilities.SmsReader;
 
 public class WebUIActivity extends AppCompatActivity {
     private WebView uiView;
     private Map<String, WebScripter> webScripters;
     private int SMS_REQUEST_CODE = 1;
+    private int AUTH_REQUEST_CODE = 2;
+    private Listener<Integer> authListener;
     private String smsCallback;
     private long smsNewerThan;
     private String visibleScripter;
@@ -120,6 +126,60 @@ public class WebUIActivity extends AppCompatActivity {
                 frameLayout.removeView(scripter.getWebView());
                 frameLayout.setVisibility(View.GONE);
             } catch (Exception e) {/*Ignored*/}
+        });
+    }
+
+    @JavascriptInterface
+    public void secureEncrypt(String data, String keyName, String authTitle, String authDescription,
+                              String success, String error) {
+        authenticateUser(authTitle, authDescription, new Listener<Integer>() {
+            @Override
+            public void on(Integer result) {
+                if(result == RESULT_CANCELED) {
+                    callback(error, "Authentication failed");
+                } else {
+                    try {
+                        String encrypted = Secrets.encrypt(keyName, data);
+                        callback(success, "'" + encrypted + "'");
+                    } catch (Exception e) {
+                        Log.e("secureEncrypt", "Exception while encrypting", e);
+                        callback(error, "'" + e + "'");
+                    }
+                }
+            }
+
+            @Override
+            public void error(Exception e) {
+                Log.e("secureEncrypt", "Exception while authenticating", e);
+                callback(error, "'" + e + "'");
+            }
+        });
+    }
+
+    @JavascriptInterface
+    public void secureDecrypt(String data, String keyName, String authTitle, String authDescription,
+                              String success, String error) {
+        authenticateUser(authTitle, authDescription, new Listener<Integer>() {
+            @Override
+            public void on(Integer result) {
+                if(result == RESULT_CANCELED) {
+                    callback(error, "Authentication failed");
+                } else {
+                    try {
+                        String encrypted = Secrets.decrypt(keyName, data);
+                        callback(success, "'" + encrypted + "'");
+                    } catch (Exception e) {
+                        Log.e("secureEncrypt", "Exception while encrypting", e);
+                        callback(error, "'" + e + "'");
+                    }
+                }
+            }
+
+            @Override
+            public void error(Exception e) {
+                Log.e("secureEncrypt", "Exception while authenticating", e);
+                callback(error, "'" + e + "'");
+            }
         });
     }
 
@@ -241,6 +301,26 @@ public class WebUIActivity extends AppCompatActivity {
             } else {
                 callback(smsCallback, "'" + "SMS_PERMISSION_DENIED" + "'");
             }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == AUTH_REQUEST_CODE) {
+            this.authListener.on(resultCode);
+        }
+    }
+
+    private void authenticateUser(String authTitle, String authDescription,
+                                  Listener<Integer> authListener) {
+        KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+        assert keyguardManager != null;
+        if(!keyguardManager.isDeviceSecure()) {
+            authListener.error(new IllegalStateException("No screen lock"));
+        } else {
+            this.authListener = authListener;
+            Intent intent = keyguardManager.createConfirmDeviceCredentialIntent(authTitle, authDescription);
+            startActivityForResult(intent, AUTH_REQUEST_CODE);
         }
     }
 }
