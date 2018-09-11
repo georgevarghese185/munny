@@ -200,8 +200,9 @@ public class WebUIActivity extends AppCompatActivity {
                 "} catch(error) {" +
                 "   console.error(error);" +
                 "}";
-
-        uiView.evaluateJavascript(String.format(command, callbackName, args.toString()), null);
+        runOnUiThread(() ->
+            uiView.evaluateJavascript(String.format(command, callbackName, args.toString()), null)
+        );
     }
 
     @Override
