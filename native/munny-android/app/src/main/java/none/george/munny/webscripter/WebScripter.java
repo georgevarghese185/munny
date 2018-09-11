@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.ViewGroup;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 public class WebScripter {
     private WebView webView;
@@ -21,9 +22,15 @@ public class WebScripter {
         WebView webView = new WebView(context);
         ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         webView.setLayoutParams(new WebView.LayoutParams(layoutParams));
+        return setupWebView(webView);
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    public static WebView setupWebView(WebView webView) {
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setDatabaseEnabled(true);
         webView.setOverScrollMode(WebView.OVER_SCROLL_NEVER);
+        webView.setWebViewClient(new WebViewClient());
         return webView;
     }
 

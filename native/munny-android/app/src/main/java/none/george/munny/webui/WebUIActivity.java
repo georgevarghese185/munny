@@ -55,7 +55,7 @@ public class WebUIActivity extends AppCompatActivity {
         }
 
         webScripters = new HashMap<>();
-        uiView = WebScripter.newWebView(this);
+        uiView = WebScripter.setupWebView(findViewById(R.id.ui_web_view));
         uiView.addJavascriptInterface(this, "Interface");
         uiView.loadUrl(getString(R.string.web_ui_source));
     }
@@ -130,9 +130,8 @@ public class WebUIActivity extends AppCompatActivity {
     }
 
     @JavascriptInterface
-    public void secureEncrypt(String data, String keyName, String authTitle, String authDescription,
-                              String success, String error) {
-        authenticateUser(authTitle, authDescription, new Listener<Integer>() {
+    public void secureEncrypt(String data, String keyName, String success, String error) {
+        authenticateUser(new Listener<Integer>() {
             @Override
             public void on(Integer result) {
                 if(result == RESULT_CANCELED) {
@@ -159,7 +158,7 @@ public class WebUIActivity extends AppCompatActivity {
     @JavascriptInterface
     public void secureDecrypt(String data, String keyName, String authTitle, String authDescription,
                               String success, String error) {
-        authenticateUser(authTitle, authDescription, new Listener<Integer>() {
+        authenticateUser(new Listener<Integer>() {
             @Override
             public void on(Integer result) {
                 if(result == RESULT_CANCELED) {
@@ -311,15 +310,14 @@ public class WebUIActivity extends AppCompatActivity {
         }
     }
 
-    private void authenticateUser(String authTitle, String authDescription,
-                                  Listener<Integer> authListener) {
+    private void authenticateUser(Listener<Integer> authListener) {
         KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
         assert keyguardManager != null;
         if(!keyguardManager.isDeviceSecure()) {
             authListener.error(new IllegalStateException("No screen lock"));
         } else {
             this.authListener = authListener;
-            Intent intent = keyguardManager.createConfirmDeviceCredentialIntent(authTitle, authDescription);
+            Intent intent = keyguardManager.createConfirmDeviceCredentialIntent(null, null);
             startActivityForResult(intent, AUTH_REQUEST_CODE);
         }
     }
