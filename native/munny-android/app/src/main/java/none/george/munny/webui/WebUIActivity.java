@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -36,6 +37,8 @@ import none.george.munny.webui.utilities.Secrets;
 import none.george.munny.webui.utilities.SmsReader;
 
 public class WebUIActivity extends AppCompatActivity {
+    private static final String START_URL = "file:///android_asset/index.html";
+
     private WebView uiView;
     private Map<String, WebScripter> webScripters;
     private int SMS_REQUEST_CODE = 1;
@@ -56,8 +59,9 @@ public class WebUIActivity extends AppCompatActivity {
 
         webScripters = new HashMap<>();
         uiView = WebScripter.setupWebView(findViewById(R.id.ui_web_view));
-        uiView.addJavascriptInterface(this, "Interface");
-        uiView.loadUrl(getString(R.string.web_ui_source));
+        uiView.setWebViewClient(new WebScripter.AssetClient());
+        uiView.addJavascriptInterface(this, "__Native_Interface");
+        uiView.loadUrl(START_URL);
     }
 
     @JavascriptInterface
@@ -255,7 +259,7 @@ public class WebUIActivity extends AppCompatActivity {
 
         String command =
                 "try{" +
-                "   window.InterfaceCallbacks[%s].apply(window, %s);" +
+                "   window.InterfaceCallbacks['%s'].apply(window, %s);" +
                 "} catch(error) {" +
                 "   console.error(error);" +
                 "}";

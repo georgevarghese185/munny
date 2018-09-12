@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">Munny</string>
-    <string name="web_ui_source">http://localhost:8000</string>
+    <string name="debug_url">http://localhost:8000/</string>
 </resources>

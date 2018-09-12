@@ -2,7 +2,15 @@
   "name": "munny",
   "version": "1.0.0",
   "scripts": {
-    "start": "webpack-dev-server --config config/webpack.dev.config.js --host 127.0.0.1 --port 8000"
+    "start": "concurrently \"npm run pulp-watch\" \"npm run webpack-serve\"",
+    "pulp-watch": "pulp --watch build",
+    "webpack-serve": "webpack-dev-server --config build/config/webpack.dev.config.js --host localhost --port 8000",
+
+    "build": "npm run pulp-build && npm run webpack-build && npm run clear-assets && npm run copy-assets",
+    "pulp-build": "pulp build --to output/pulp_bundle.js",
+    "webpack-build": "webpack --config build/config/webpack.prod.config.js",
+    "clear-assets": "rm -rf ../native/munny-android/app/src/main/assets/app/*",
+    "copy-assets": "cp -R dist/* ../native/munny-android/app/src/main/assets/app/"
   },
   "devDependencies": {
     "psc-package": "^0.3.2",

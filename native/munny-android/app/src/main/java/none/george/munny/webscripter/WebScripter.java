@@ -4,13 +4,25 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.Nullable;
 import android.view.ViewGroup;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+import none.george.munny.BuildConfig;
+import none.george.munny.R;
 
 public class WebScripter {
     private WebView webView;
     private Script script;
+    public static final String MAIN_SCRIPT_URL = "file:///android_asset/index.js";
 
 
     public WebScripter(Context context) {
@@ -30,7 +42,6 @@ public class WebScripter {
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setDatabaseEnabled(true);
         webView.setOverScrollMode(WebView.OVER_SCROLL_NEVER);
-        webView.setWebViewClient(new WebViewClient());
         return webView;
     }
 
@@ -56,5 +67,34 @@ public class WebScripter {
 
             webView.destroy();
         });
+    }
+
+    public static class AssetClient extends WebViewClient {@Nullable
+        @Override
+        public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+            Context context = view.getContext();
+            String url = request.getUrl().toString();
+            try {
+                if (url.matches("^file:///android_asset/.*")) {
+                    String file = url.split("file:///android_asset/")[1];
+                    InputStream inputStream;
+
+                    if (BuildConfig.DEBUG) {
+                        String debugRoot = context.getString(R.string.debug_url);
+                        URL debugUrl = new URL(debugRoot + file);
+                        HttpURLConnection connection = (HttpURLConnection) debugUrl.openConnection();
+                        inputStream = connection.getInputStream();
+                    } else {
+                        inputStream = context.getAssets().open("app/" + file);
+                    }
+
+                    return new WebResourceResponse("text/javascript", "UTF-8", inputStream);
+                } else {
+                    return super.shouldInterceptRequest(view, request);
+                }
+            } catch (Exception e) {
+                return super.shouldInterceptRequest(view, request);
+            }
+        }
     }
 }

@@ -1,1 +1,4 @@
 /build
+
+# App assets (copied from web app project folder)
+/src/main/assets/app/*
