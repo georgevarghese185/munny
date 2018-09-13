@@ -1,8 +1,9 @@
 {
   "name": "app",
-  "set": "psc-0.12.0",
+  "set": "psc-0.12.0-20180901",
   "source": "https://github.com/purescript/package-sets.git",
   "depends": [
+    "foreign-generic",
     "aff",
     "psci-support",
     "console",
