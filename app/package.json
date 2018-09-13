@@ -13,6 +13,7 @@
     "copy-assets": "cp -R dist/* ../native/munny-android/app/src/main/assets/app/"
   },
   "devDependencies": {
+    "concurrently": "^4.0.1",
     "psc-package": "^0.3.2",
     "pulp": "^12.3.0",
     "purescript": "^0.12.0",
