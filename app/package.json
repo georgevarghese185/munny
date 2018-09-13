@@ -7,8 +7,8 @@
     "build": "npm run pulp-build && npm run webpack-build && npm run clear-assets && npm run copy-assets",
     "pulp-build": "pulp build --to output/pulp_bundle.js",
     "webpack-build": "webpack --config build/config/webpack.prod.config.js",
-    "clear-assets": "rm -rf ../native/munny-android/app/src/main/assets/app/*",
-    "copy-assets": "cp -R dist/* ../native/munny-android/app/src/main/assets/app/"
+    "clear-assets": "rm -rf ../native/munny-android/app/src/main/assets/app",
+    "copy-assets": "mkdir ../native/munny-android/app/src/main/assets/app && cp -R dist/* ../native/munny-android/app/src/main/assets/app"
   },
   "devDependencies": {
     "concurrently": "^4.0.1",
