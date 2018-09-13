@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.Uri;
+import android.security.keystore.UserNotAuthenticatedException;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -145,56 +146,133 @@ public class WebUIActivity extends AppCompatActivity {
     }
 
     @JavascriptInterface
-    public void secureEncrypt(String data, String keyName, String success, String error) {
+    public boolean isDeviceSecure() {
+        try {
+            KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+            assert keyguardManager != null;
+            return keyguardManager.isDeviceSecure();
+        } catch (Exception e) {
+            Log.e("isUserAuthenticated", "Exception", e);
+            return false;
+        }
+    }
+
+    @JavascriptInterface
+    public boolean isUserAuthenticated() {
+        try {
+            KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+            assert keyguardManager != null;
+            return keyguardManager.isKeyguardLocked();
+        } catch (Exception e) {
+            Log.e("isUserAuthenticated", "Exception", e);
+            return false;
+        }
+    }
+
+    @JavascriptInterface
+    public void generateSecureKey(String keyAlias, String success, String error) {
+        try {
+            Secrets.generateKey(keyAlias, false, 0);
+            callback(success);
+        } catch (Exception e) {
+            callback(error, e);
+        }
+    }
+
+    @JavascriptInterface
+    public void generateSecureKeyWithUserAuth(String keyAlias, int authValidSeconds, String success, String error) {
+        try {
+            Secrets.generateKey(keyAlias, true, authValidSeconds);
+            callback(success);
+        } catch (Exception e) {
+            callback(error, e);
+        }
+    }
+
+    @JavascriptInterface
+    public void authenticateUser(String success, String error) {
         authenticateUser(new Listener<Integer>() {
             @Override
             public void on(Integer result) {
                 if(result == RESULT_CANCELED) {
                     callback(error, "Authentication failed");
                 } else {
-                    try {
-                        String encrypted = Secrets.encrypt(keyName, data);
-                        callback(success, encrypted);
-                    } catch (Exception e) {
-                        Log.e("secureEncrypt", "Exception while encrypting", e);
-                        callback(error, e);
-                    }
+                    callback(success);
                 }
             }
 
             @Override
             public void error(Exception e) {
-                Log.e("secureEncrypt", "Exception while authenticating", e);
+                Log.e("authenticateUser", "Authentication exception", e);
                 callback(error, e);
             }
         });
     }
 
     @JavascriptInterface
-    public void secureDecrypt(String data, String keyName, String authTitle, String authDescription,
-                              String success, String error) {
-        authenticateUser(new Listener<Integer>() {
-            @Override
-            public void on(Integer result) {
-                if(result == RESULT_CANCELED) {
-                    callback(error, "Authentication failed");
-                } else {
-                    try {
-                        String encrypted = Secrets.decrypt(keyName, data);
-                        callback(success, encrypted);
-                    } catch (Exception e) {
-                        Log.e("secureEncrypt", "Exception while encrypting", e);
-                        callback(error, e);
+    public void secureEncrypt(String data, String keyName, String success, String error) {
+        try {
+            String encrypted = Secrets.encrypt(keyName, data);
+            callback(success, encrypted);
+        } catch (UserNotAuthenticatedException e) {
+            authenticateUser(new Listener<Integer>() {
+                @Override
+                public void on(Integer result) {
+                    if(result == RESULT_OK) {
+                        try {
+                            String encrypted = Secrets.encrypt(keyName, data);
+                            callback(success, encrypted);
+                        } catch (Exception e) {
+                            Log.e("secureEncrypt", "Exception while encrypting (after auth)", e);
+                            callback(error, e);
+                        }
+                    } else {
+                        callback(error, new UserNotAuthenticatedException("User did not clear auth dialog"));
                     }
                 }
-            }
 
-            @Override
-            public void error(Exception e) {
-                Log.e("secureEncrypt", "Exception while authenticating", e);
-                callback(error, e);
-            }
-        });
+                @Override
+                public void error(Exception e) {
+                    callback(error, e);
+                }
+            });
+        } catch (Exception e) {
+            Log.e("secureEncrypt", "Exception while encrypting", e);
+            callback(error, e);
+        }
+    }
+
+    @JavascriptInterface
+    public void secureDecrypt(String data, String keyName, String success, String error) {
+        try {
+            String decrypted = Secrets.decrypt(keyName, data);
+            callback(success, decrypted);
+        } catch (UserNotAuthenticatedException e) {
+            authenticateUser(new Listener<Integer>() {
+                @Override
+                public void on(Integer result) {
+                    if(result == RESULT_OK) {
+                        try {
+                            String decrypted = Secrets.decrypt(keyName, data);
+                            callback(success, decrypted);
+                        } catch (Exception e) {
+                            Log.e("secureDecrypt", "Exception while decrypting (after auth)", e);
+                            callback(error, e);
+                        }
+                    } else {
+                        callback(error, new UserNotAuthenticatedException("User did not clear auth dialog"));
+                    }
+                }
+
+                @Override
+                public void error(Exception e) {
+                    callback(error, e);
+                }
+            });
+        } catch (Exception e) {
+            Log.e("secureDecrypt", "Exception while decrypting", e);
+            callback(error, e);
+        }
     }
 
 
@@ -234,6 +312,11 @@ public class WebUIActivity extends AppCompatActivity {
     @JavascriptInterface
     public void exit() {
         finish();
+    }
+
+    @JavascriptInterface
+    public void test(String success) {
+        callback(success, 1, "2", new JSONObject(), new JSONArray());
     }
 
 
