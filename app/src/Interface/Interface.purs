@@ -1,4 +1,4 @@
-module Startup.Interface where
+module Interface where
 
 import Prelude
 
