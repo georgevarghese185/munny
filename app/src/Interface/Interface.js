@@ -23,7 +23,7 @@ exports.setupInterface = function() {
         }
       })
 
-      window.__Native_Interface[key].apply(window.__Native_Interface, newArgs);
+      return window.__Native_Interface[key].apply(window.__Native_Interface, newArgs);
     }
   })
 }
