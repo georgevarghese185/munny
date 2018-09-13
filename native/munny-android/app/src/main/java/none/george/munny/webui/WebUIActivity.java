@@ -89,9 +89,18 @@ public class WebUIActivity extends AppCompatActivity {
         try {
             WebScripter webScripter = webScripters.get(id);
             Script script = makeScripter(scripterString);
-            webScripter.executeScript(script, (result) ->
-                    callback(success, makeResultArray(result))
-            );
+            webScripter.executeScript(script, (results) -> {
+                JSONArray resultArray = new JSONArray();
+                try {
+                    for (String result : results) {
+                        resultArray.put(result);
+                    }
+                } catch (Exception e) {
+                    Log.e("makeResultArray", "Exception", e);
+                }
+
+                callback(success, resultArray);
+            });
         } catch (Exception e) {
             Log.e("executeScripter", "Exception", e);
             callback(error, e);
@@ -235,19 +244,6 @@ public class WebUIActivity extends AppCompatActivity {
         }
 
         return builder.build();
-    }
-
-    private JSONArray makeResultArray(List<String> results) {
-        JSONArray jsonArray = new JSONArray();
-        try {
-            for(String result : results) {
-                jsonArray.put(result);
-            }
-        } catch (Exception e) {
-            Log.e("makeResultArray", "Exception", e);
-        }
-
-        return jsonArray;
     }
 
 
