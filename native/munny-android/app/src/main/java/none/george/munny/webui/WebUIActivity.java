@@ -21,6 +21,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
@@ -253,29 +254,38 @@ public class WebUIActivity extends AppCompatActivity {
 
 
     private void callback(String callbackName, Object ...arguments) {
-        StringJoiner args = new StringJoiner(", ", "[", "]");
-        for(Object argument : arguments) {
-            String argumentString;
-
-            if(argument instanceof Integer || argument instanceof Double || argument instanceof Float
-                    || argument instanceof JSONArray || argument instanceof JSONObject) {
-                argumentString = argument.toString();
-            } else {
-                argumentString = "'" + argument.toString() + "'";
+        try {
+            JSONArray args = new JSONArray();
+            for(Object argument : arguments) {
+                if(argument instanceof Integer || argument instanceof Double || argument instanceof Float
+                        || argument instanceof JSONObject || argument instanceof JSONArray) {
+                    args.put(argument);
+                } else {
+                    args.put("'" + argument.toString() + "'");
+                }
             }
 
-            args.add(argumentString.replace("\\", "\\\\")); //evaluateJavascript always removes one level of escape characters. This will help preserve them
-        }
 
-        String command =
-                "try{" +
-                "   window.InterfaceCallbacks['%s'].apply(window, %s);" +
-                "} catch(error) {" +
-                "   console.error(error);" +
-                "}";
-        runOnUiThread(() ->
-            uiView.evaluateJavascript(String.format(command, callbackName, args.toString()), null)
-        );
+            String command =
+                    "try{" +
+                    "   var arguments = JSON.parse(decodeURIComponent('%s'));" +
+                    "   window.InterfaceCallbacks['%s'].apply(window, arguments);" +
+                    "} catch(error) {" +
+                    "   console.error(error);" +
+                    "}";
+            runOnUiThread(() -> {
+                try {
+                    String argsString = URLEncoder.encode(args.toString(), "UTF-8");
+                    uiView.evaluateJavascript(String.format(command, argsString, callbackName), null);
+                } catch (Exception e) {
+                    Log.e("callback", "Fatal exception", e);
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (Exception e) {
+            Log.e("callback", "Fatal exception", e);
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -312,7 +322,7 @@ public class WebUIActivity extends AppCompatActivity {
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 getSms(smsNewerThan, smsCallback);
             } else {
-                callback(smsCallback, "'" + "SMS_PERMISSION_DENIED" + "'");
+                callback(smsCallback, "SMS_PERMISSION_DENIED");
             }
         }
     }
