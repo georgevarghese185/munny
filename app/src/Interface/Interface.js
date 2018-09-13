@@ -1,4 +1,4 @@
-exports["setupInterface"] = function() {
+exports.setupInterface = function() {
 
   window.InterfaceCallbacks = {}
   callbackId = 0;
@@ -27,3 +27,31 @@ exports["setupInterface"] = function() {
     }
   })
 }
+
+exports.spawnWebScripter = function(id, callback) {
+  Interface.spawnWebScripter(id, callback)
+}
+
+exports.killScripter = function(id) {
+  Interface.killScripter(id);
+}
+
+exports.executeScripter = function(id, script, success, error) {
+  var success1 = function() {
+    console.log(arguments);
+    success(arguments[0]);
+  }
+  Interface.executeScripter(id, script, success1, error)
+}
+
+exports.showScripter = function(id) {
+  Interface.showScripter(id);
+}
+
+exports.hideScripter = function (id) {
+  Interface.hideScripter(id);
+};
+
+exports.exit = function () {
+  Interface.exit();
+};
