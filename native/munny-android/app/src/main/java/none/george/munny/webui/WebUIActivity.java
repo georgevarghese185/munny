@@ -90,11 +90,11 @@ public class WebUIActivity extends AppCompatActivity {
             WebScripter webScripter = webScripters.get(id);
             Script script = makeScripter(scripterString);
             webScripter.executeScript(script, (result) ->
-                    callback(success, makeResultArray(result).toString())
+                    callback(success, makeResultArray(result))
             );
         } catch (Exception e) {
             Log.e("executeScripter", "Exception", e);
-            callback(error, e.toString());
+            callback(error, e);
         }
     }
 
@@ -143,10 +143,10 @@ public class WebUIActivity extends AppCompatActivity {
                 } else {
                     try {
                         String encrypted = Secrets.encrypt(keyName, data);
-                        callback(success, "'" + encrypted + "'");
+                        callback(success, encrypted);
                     } catch (Exception e) {
                         Log.e("secureEncrypt", "Exception while encrypting", e);
-                        callback(error, "'" + e + "'");
+                        callback(error, e);
                     }
                 }
             }
@@ -154,7 +154,7 @@ public class WebUIActivity extends AppCompatActivity {
             @Override
             public void error(Exception e) {
                 Log.e("secureEncrypt", "Exception while authenticating", e);
-                callback(error, "'" + e + "'");
+                callback(error, e);
             }
         });
     }
@@ -170,10 +170,10 @@ public class WebUIActivity extends AppCompatActivity {
                 } else {
                     try {
                         String encrypted = Secrets.decrypt(keyName, data);
-                        callback(success, "'" + encrypted + "'");
+                        callback(success, encrypted);
                     } catch (Exception e) {
                         Log.e("secureEncrypt", "Exception while encrypting", e);
-                        callback(error, "'" + e + "'");
+                        callback(error, e);
                     }
                 }
             }
@@ -181,7 +181,7 @@ public class WebUIActivity extends AppCompatActivity {
             @Override
             public void error(Exception e) {
                 Log.e("secureEncrypt", "Exception while authenticating", e);
-                callback(error, "'" + e + "'");
+                callback(error, e);
             }
         });
     }
@@ -206,7 +206,7 @@ public class WebUIActivity extends AppCompatActivity {
                             smsObj.put("body", sms.body);
                             smsArray.put(smsObj);
                         }
-                        callback(callback, smsArray.toString());
+                        callback(callback, smsArray);
                     } catch (Exception e) {
                         Log.e("getSms", "Exception in `on`", e);
                     }
@@ -214,7 +214,7 @@ public class WebUIActivity extends AppCompatActivity {
 
                 @Override
                 public void error(Exception e) {
-                    callback(callback, e.toString());
+                    callback(callback, e);
                 }
             });
         }
@@ -251,10 +251,19 @@ public class WebUIActivity extends AppCompatActivity {
     }
 
 
-    private void callback(String callbackName, String ...arguments) {
+    private void callback(String callbackName, Object ...arguments) {
         StringJoiner args = new StringJoiner(", ", "[", "]");
-        for(String argument : arguments) {
-            args.add(argument);
+        for(Object argument : arguments) {
+            String argumentString;
+
+            if(argument instanceof Integer || argument instanceof Double || argument instanceof Float
+                    || argument instanceof JSONArray || argument instanceof JSONObject) {
+                argumentString = argument.toString();
+            } else {
+                argumentString = "'" + argument.toString() + "'";
+            }
+
+            args.add(argumentString.replace("\\", "\\\\")); //evaluateJavascript always removes one level of escape characters. This will help preserve them
         }
 
         String command =
