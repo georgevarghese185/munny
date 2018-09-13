@@ -15,7 +15,7 @@ main = do
   log "Setting up Interface" *> setupInterface
   log "Setting up Event listeners" *> setupEvents
   log "Startup complete"
-  runAff_ handler app
+  -- runAff_ handler app
   where
     handler :: Either Error Unit -> Effect Unit
     handler _ = exit
