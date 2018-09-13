@@ -85,16 +85,16 @@ public class WebUIActivity extends AppCompatActivity {
 
 
     @JavascriptInterface
-    public void executeScripter(String id, String scripterString, String callback) {
+    public void executeScripter(String id, String scripterString, String success, String error) {
         try {
             WebScripter webScripter = webScripters.get(id);
             Script script = makeScripter(scripterString);
             webScripter.executeScript(script, (result) ->
-                    callback(callback, makeResultArray(result).toString())
+                    callback(success, makeResultArray(result).toString())
             );
         } catch (Exception e) {
             Log.e("executeScripter", "Exception", e);
-            callback(callback, e.toString());
+            callback(error, e.toString());
         }
     }
 
