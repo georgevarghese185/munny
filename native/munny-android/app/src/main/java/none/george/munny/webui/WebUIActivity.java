@@ -11,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.webkit.JavascriptInterface;
@@ -263,20 +264,15 @@ public class WebUIActivity extends AppCompatActivity {
 
             String command =
                     "try{" +
-                    "   var arguments = JSON.parse(decodeURIComponent('%s'));" +
+                    "   var arguments = JSON.parse(atob('%s'));" +
                     "   window.InterfaceCallbacks['%s'].apply(window, arguments);" +
                     "} catch(error) {" +
                     "   console.error(error);" +
                     "}";
-            runOnUiThread(() -> {
-                try {
-                    String argsString = URLEncoder.encode(args.toString(), "UTF-8");
-                    uiView.evaluateJavascript(String.format(command, argsString, callbackName), null);
-                } catch (Exception e) {
-                    Log.e("callback", "Fatal exception", e);
-                    throw new RuntimeException(e);
-                }
-            });
+            runOnUiThread(() ->
+                uiView.evaluateJavascript(String.format(command,
+                        Base64.encodeToString(args.toString().getBytes(), Base64.NO_WRAP), callbackName), null)
+            );
         } catch (Exception e) {
             Log.e("callback", "Fatal exception", e);
             throw new RuntimeException(e);
