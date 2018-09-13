@@ -229,6 +229,11 @@ public class WebUIActivity extends AppCompatActivity {
         }
     }
 
+    @JavascriptInterface
+    public void exit() {
+        finish();
+    }
+
 
     private Script makeScripter(String scripterString) throws JSONException {
         JSONArray steps = new JSONArray(scripterString);
