@@ -257,12 +257,7 @@ public class WebUIActivity extends AppCompatActivity {
         try {
             JSONArray args = new JSONArray();
             for(Object argument : arguments) {
-                if(argument instanceof Integer || argument instanceof Double || argument instanceof Float
-                        || argument instanceof JSONObject || argument instanceof JSONArray) {
-                    args.put(argument);
-                } else {
-                    args.put("'" + argument.toString() + "'");
-                }
+                args.put(argument);
             }
 
 
