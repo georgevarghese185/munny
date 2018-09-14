@@ -44,6 +44,10 @@ exports._executeScripter = function(id, script, success, error) {
   Interface.executeScripter(id, script, success1, error)
 }
 
+exports._cancelScripter = function (id) {
+  Interface.cancelScripter(id);
+};
+
 exports._showScripter = function(id) {
   Interface.showScripter(id);
 }

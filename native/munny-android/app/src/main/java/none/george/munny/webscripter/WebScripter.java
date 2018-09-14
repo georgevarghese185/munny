@@ -61,12 +61,15 @@ public class WebScripter {
 
     public void kill() {
         new Handler(Looper.getMainLooper()).post(() -> {
-            if(this.script != null) {
-                script.end();
-            }
-
+            cancel();
             webView.destroy();
         });
+    }
+
+    public void cancel() {
+        if(this.script != null) {
+            script.end();
+        }
     }
 
     public static class AssetClient extends WebViewClient {@Nullable

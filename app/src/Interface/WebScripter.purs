@@ -7,12 +7,13 @@ import Data.Either (Either(..), hush)
 import Data.Generic.Rep (class Generic)
 import Data.Maybe (Maybe)
 import Data.Newtype (class Newtype)
-import Effect.Aff (Aff, makeAff, nonCanceler)
+import Effect.Aff (Aff, effectCanceler, makeAff, nonCanceler)
 import Effect.Class (liftEffect)
 import Effect.Uncurried (mkEffectFn1, runEffectFn1, runEffectFn2, runEffectFn4)
 import Foreign (unsafeToForeign)
 import Foreign.Class (class Encode, decode)
 import Foreign.Generic (defaultOptions, encodeJSON, genericEncode)
+import Interface (_cancelScripter)
 import Interface as Interface
 
 newtype ScripterId = ScripterId String
@@ -55,4 +56,5 @@ executeScripter (ScripterId id) script =
     decodeMaybeString = decode >>> runExcept >>> hush
     success cb = (mkEffectFn1 $ map decodeMaybeString >>> Right >>> Right >>> cb)
     error cb = (mkEffectFn1 $ Left >>> Right >>> cb) in
-  makeAff (\cb -> runEffectFn4 Interface._executeScripter id (encodeJSON script) (success cb) (error cb) *> pure nonCanceler
+  makeAff (\cb -> runEffectFn4 Interface._executeScripter id (encodeJSON script) (success cb) (error cb)
+                    *> pure (effectCanceler (runEffectFn1 _cancelScripter id)))

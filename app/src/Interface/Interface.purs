@@ -19,6 +19,7 @@ foreign import _setupInterface :: Effect Unit
 foreign import _spawnWebScripter :: EF2 String (Effect Unit)
 foreign import _killScripter :: EF1 String
 foreign import _executeScripter :: EF4 String String (EF1 (Array Foreign)) (EF1 String)
+foreign import _cancelScripter :: EF1 String
 foreign import _showScripter :: EF1 String
 foreign import _hideScripter :: EF1 String
 foreign import _exit :: Effect Unit

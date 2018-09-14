@@ -111,6 +111,12 @@ public class WebUIActivity extends AppCompatActivity {
     }
 
     @JavascriptInterface
+    public void cancelScripterExecution(String id) {
+        WebScripter webScripter = webScripters.get(id);
+        webScripter.cancel();
+    }
+
+    @JavascriptInterface
     public void showScripter(String id) {
         if(visibleScripter != null) {
             if(visibleScripter.equals(id)) {
