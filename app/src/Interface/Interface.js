@@ -56,6 +56,34 @@ exports._hideScripter = function (id) {
   Interface.hideScripter(id);
 };
 
+exports._isDeviceSecure = function () {
+  return Interface.isDeviceSecure();
+};
+
+exports._isUserAuthenticated = function() {
+  return Interface.isUserAuthenticated();
+}
+
+exports._authenticateUser = function (success, error) {
+  Interface.authenticateUser(success, error);
+};
+
+exports._generateSecureKey = function (keyAlias, success, error) {
+  Interface.generateSecureKey(keyAlias, success, error);
+};
+
+exports._generateSecureKeyWithUserAuth = function (keyAlias, validFor, success, error) {
+  Interface.generateSecureKeyWithUserAuth(keyAlias, validFor, success, error);
+};
+
+exports._secureEncrypt = function (data, keyAlias, success, error) {
+  Interface.secureEncrypt(data, keyAlias, success, error);
+};
+
+exports._secureDecrypt = function (data, keyAlias, success, error) {
+  Interface.secureDecrypt(data, keyAlias, success, error);
+};
+
 exports._exit = function () {
   Interface.exit();
 };

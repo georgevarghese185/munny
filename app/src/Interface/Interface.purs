@@ -22,4 +22,13 @@ foreign import _executeScripter :: EF4 String String (EF1 (Array Foreign)) (EF1 
 foreign import _cancelScripter :: EF1 String
 foreign import _showScripter :: EF1 String
 foreign import _hideScripter :: EF1 String
+
+foreign import _isDeviceSecure :: Effect Boolean
+foreign import _isUserAuthenticated :: Effect Boolean
+foreign import _authenticateUser :: EF2 (Effect Unit) (EF1 String)
+foreign import _generateSecureKey :: EF3 String (Effect Unit) (EF1 String)
+foreign import _generateSecureKeyWithUserAuth :: EF4 String Int (Effect Unit) (EF1 String)
+foreign import _secureEncrypt :: EF4 String String (EF1 String) (EF1 String)
+foreign import _secureDecrypt :: EF4 String String (EF1 String) (EF1 String)
+
 foreign import _exit :: Effect Unit
