@@ -6,19 +6,19 @@ import Data.Either (Either(..))
 import Effect (Effect)
 import Effect.Aff (Aff, Error, runAff_)
 import Effect.Class.Console (log, logShow)
-import Interface (exit, setupInterface)
+import Interface (_exit, _setupInterface)
 import Interface.Events (setupEvents)
 import WebScripter (Script(..), ScriptStep(..), ScripterId(..), createScripter, executeScripter)
 
 main :: Effect Unit
 main = do
-  log "Setting up Interface" *> setupInterface
+  log "Setting up Interface" *> _setupInterface
   log "Setting up Event listeners" *> setupEvents
   log "Startup complete"
   -- runAff_ handler app
   where
     handler :: Either Error Unit -> Effect Unit
-    handler _ = exit
+    handler _ = _exit
 
 app :: Aff Unit
 app = do

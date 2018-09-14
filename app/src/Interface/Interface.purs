@@ -15,10 +15,10 @@ type EF2 a b = EffectFn2 a b Unit
 type EF3 a b c = EffectFn3 a b c Unit
 type EF4 a b c d = EffectFn4 a b c d Unit
 
-foreign import setupInterface :: Effect Unit
-foreign import spawnWebScripter :: EF2 String (Effect Unit)
-foreign import killScripter :: EF1 String
-foreign import executeScripter :: EF4 String String (EF1 (Array Foreign)) (EF1 String)
-foreign import showScripter :: EF1 String
-foreign import hideScripter :: EF1 String
-foreign import exit :: Effect Unit
+foreign import _setupInterface :: Effect Unit
+foreign import _spawnWebScripter :: EF2 String (Effect Unit)
+foreign import _killScripter :: EF1 String
+foreign import _executeScripter :: EF4 String String (EF1 (Array Foreign)) (EF1 String)
+foreign import _showScripter :: EF1 String
+foreign import _hideScripter :: EF1 String
+foreign import _exit :: Effect Unit

@@ -35,19 +35,19 @@ instance encodeScript :: Encode Script where encode = genericEncode defaultOptio
 
 createScripter :: ScripterId -> Aff Unit
 createScripter (ScripterId id) =
-  makeAff (\cb -> runEffectFn2 Interface.spawnWebScripter id (cb $ Right unit) *> pure nonCanceler)
+  makeAff (\cb -> runEffectFn2 Interface._spawnWebScripter id (cb $ Right unit) *> pure nonCanceler)
 
 killScripter :: ScripterId -> Aff Unit
 killScripter (ScripterId id) =
-  liftEffect $ runEffectFn1 Interface.killScripter id
+  liftEffect $ runEffectFn1 Interface._killScripter id
 
 showScripter :: ScripterId -> Aff Unit
 showScripter (ScripterId id) =
-  liftEffect $ runEffectFn1 Interface.showScripter id
+  liftEffect $ runEffectFn1 Interface._showScripter id
 
 hideScripter :: ScripterId -> Aff Unit
 hideScripter (ScripterId id) =
-  liftEffect $ runEffectFn1 Interface.hideScripter id
+  liftEffect $ runEffectFn1 Interface._hideScripter id
 
 executeScripter :: ScripterId -> Script -> Aff (Either String (Array (Maybe String)))
 executeScripter (ScripterId id) script =
@@ -55,4 +55,4 @@ executeScripter (ScripterId id) script =
     decodeMaybeString = decode >>> runExcept >>> hush
     success cb = (mkEffectFn1 $ map decodeMaybeString >>> Right >>> Right >>> cb)
     error cb = (mkEffectFn1 $ Left >>> Right >>> cb) in
-  makeAff (\cb -> runEffectFn4 Interface.executeScripter id (encodeJSON script) (success cb) (error cb) *> pure nonCanceler)
+  makeAff (\cb -> runEffectFn4 Interface._executeScripter id (encodeJSON script) (success cb) (error cb) *> pure nonCanceler

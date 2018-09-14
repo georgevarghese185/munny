@@ -1,4 +1,4 @@
-exports.setupInterface = function() {
+exports._setupInterface = function() {
 
   window.InterfaceCallbacks = {}
   callbackId = 0;
@@ -28,15 +28,15 @@ exports.setupInterface = function() {
   })
 }
 
-exports.spawnWebScripter = function(id, callback) {
+exports._spawnWebScripter = function(id, callback) {
   Interface.spawnWebScripter(id, callback)
 }
 
-exports.killScripter = function(id) {
+exports._killScripter = function(id) {
   Interface.killScripter(id);
 }
 
-exports.executeScripter = function(id, script, success, error) {
+exports._executeScripter = function(id, script, success, error) {
   var success1 = function() {
     console.log(arguments);
     success(arguments[0]);
@@ -44,14 +44,14 @@ exports.executeScripter = function(id, script, success, error) {
   Interface.executeScripter(id, script, success1, error)
 }
 
-exports.showScripter = function(id) {
+exports._showScripter = function(id) {
   Interface.showScripter(id);
 }
 
-exports.hideScripter = function (id) {
+exports._hideScripter = function (id) {
   Interface.hideScripter(id);
 };
 
-exports.exit = function () {
+exports._exit = function () {
   Interface.exit();
 };
