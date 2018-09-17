@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "scripts": {
     "start": "node build/scripts/debug.js",
-
     "build": "npm run pulp-build && npm run webpack-build && npm run clear-assets && npm run copy-assets",
     "pulp-build": "pulp build --to output/pulp_bundle.js",
     "webpack-build": "webpack --config build/config/webpack.prod.config.js",
