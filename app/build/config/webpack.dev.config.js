@@ -6,6 +6,7 @@ module.exports = {
     filename: 'index.js',
     path: path.resolve(__dirname, '../../dist')
   },
+  watch: true,
   devServer: {
     contentBase: "./dist"
   },
