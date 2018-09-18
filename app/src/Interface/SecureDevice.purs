@@ -3,6 +3,7 @@ module SecureDevice (
   , Cipher
   , isDeviceSecure
   , isUserAuthenticated
+  , authenticateUser
   , generateSecureKey
   , generateSecureKeyWithUserAuth
   , secureEncrypt
