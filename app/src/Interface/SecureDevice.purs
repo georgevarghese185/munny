@@ -21,7 +21,7 @@ import Effect.Class (liftEffect)
 import Effect.Uncurried (mkEffectFn1, runEffectFn2, runEffectFn3, runEffectFn4)
 import Foreign (ForeignError(..), fail, readString)
 import Foreign.Class (class Decode, class Encode, encode)
-import Interface (_authenticateUser, _generateSecureKey, _generateSecureKeyWithUserAuth, _isDeviceSecure, _isUserAuthenticated, _secureEncrypt)
+import Interface (_authenticateUser, _generateSecureKey, _generateSecureKeyWithUserAuth, _isDeviceSecure, _isUserAuthenticated, _secureDecrypt, _secureEncrypt)
 import Partial.Unsafe (unsafePartial)
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -97,7 +97,7 @@ secureEncrypt text (KeyAlias keyAlias) =
 
 secureDecrypt :: Cipher -> KeyAlias -> Aff (Either String String)
 secureDecrypt cipher (KeyAlias keyAlias) =
-  makeAff (\cb -> runEffectFn4 _secureEncrypt
+  makeAff (\cb -> runEffectFn4 _secureDecrypt
                     (fromCipher cipher)
                     keyAlias
                     (mkEffectFn1 $ Right >>> Right >>> cb)
