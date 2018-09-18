@@ -2,12 +2,8 @@ module Interface where
 
 import Prelude
 
-import Data.Either (Either(..))
-import Data.Newtype (class Newtype)
 import Effect (Effect)
-import Effect.Aff (Aff, makeAff, nonCanceler)
-import Effect.Class (liftEffect)
-import Effect.Uncurried (EffectFn1, EffectFn2, EffectFn3, EffectFn4, runEffectFn1, runEffectFn2)
+import Effect.Uncurried (EffectFn1, EffectFn2, EffectFn3, EffectFn4)
 import Foreign (Foreign)
 
 type EF1 a = EffectFn1 a Unit
