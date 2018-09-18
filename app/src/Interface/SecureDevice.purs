@@ -38,7 +38,7 @@ toCipher = unsafeCoerce
 fromCipher :: Cipher -> String
 fromCipher = unsafeCoerce
 
-instance showCipher :: Show Cipher where show = unsafeCoerce
+instance showCipher :: Show Cipher where show = fromCipher
 instance encodeCipher :: Encode Cipher where
   encode = fromCipher >>> encode
 instance decodeCipher :: Decode Cipher where
