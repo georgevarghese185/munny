@@ -1,4 +1,4 @@
-module WebScripter where
+module Interface.WebScripter where
 
 import Prelude
 

@@ -8,8 +8,8 @@ import Effect.Aff (Aff, launchAff_)
 import Effect.Class.Console (error, log, logShow, warn)
 import Interface (_setupInterface)
 import Interface.Events (setupEvents)
-import SecureDevice (KeyAlias(..), authenticateUser, generateSecureKey, generateSecureKeyWithUserAuth, isDeviceSecure, secureDecrypt, secureEncrypt)
-import WebScripter (Script(..), ScriptStep(..), ScripterId(..), createScripter, executeScripter, hideScripter, killScripter, showScripter)
+import Interface.SecureDevice (KeyAlias(..), authenticateUser, generateSecureKey, generateSecureKeyWithUserAuth, isDeviceSecure, secureDecrypt, secureEncrypt)
+import Interface.WebScripter (Script(..), ScriptStep(..), ScripterId(..), createScripter, executeScripter, hideScripter, killScripter, showScripter)
 
 main :: Effect Unit
 main = do
