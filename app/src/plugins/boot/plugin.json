@@ -1,0 +1,13 @@
+{
+  "name": "boot",
+  "type": "boot",
+  "ui": {
+    "type": "screen"
+  },
+  "inputs": ["ui"],
+  "outputs": [],
+  "build": {
+    "entry": "Plugin.Boot.Main",
+    "type": "purs"
+  }
+}
