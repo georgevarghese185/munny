@@ -1,4 +1,5 @@
 const gulp = require('gulp');
+const serve = require('gulp-serve')
 const glob = require('glob');
 const webpack = require('webpack-stream')
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
@@ -23,8 +24,17 @@ const buildInfo = {
   }
 }
 
+gulp.task('debug', ['serve'], function() {
+  gulp.watch('src/**/*', ['build'])
+})
 
-gulp.task('debug', ['init', 'webpack'])
+gulp.task('serve', ['build'], serve({
+  root: ['dist'],
+  port: 8080,
+  hostname: "localhost"
+}));
+
+gulp.task('build', ['init', 'webpack'])
 
 gulp.task('webpack', ['init', 'purs-bundle'], function() {
   let entry = {}
