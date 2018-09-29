@@ -1,4 +1,4 @@
-module Interface.Events (
+module App.Interface.Events (
     Event
   , setupEvents
   ) where

@@ -1,4 +1,4 @@
-module Interface.WebScripter (
+module App.Interface.WebScripter (
     ScripterId(..)
   , ScriptStep(..)
   , Script(..)

@@ -1,4 +1,4 @@
-module Interface where
+module App.Interface where
 
 import Prelude
 

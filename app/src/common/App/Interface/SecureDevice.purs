@@ -1,4 +1,4 @@
-module Interface.SecureDevice (
+module App.Interface.SecureDevice (
     KeyAlias(..)
   , Cipher
   , isDeviceSecure

@@ -1,4 +1,4 @@
-module Test.Main where
+module App.Test.Main where
 
 import Prelude
 
@@ -6,10 +6,10 @@ import Data.Either (Either(..), either)
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff_)
 import Effect.Class.Console (error, log, logShow, warn)
-import Interface (setupInterface)
-import Interface.Events (setupEvents)
-import Interface.SecureDevice (KeyAlias(..), authenticateUser, generateSecureKey, generateSecureKeyWithUserAuth, isDeviceSecure, secureDecrypt, secureEncrypt)
-import Interface.WebScripter (Script(..), ScriptStep(..), ScripterId(..), createScripter, executeScripter, hideScripter, killScripter, showScripter)
+import App.Interface (setupInterface)
+import App.Interface.Events (setupEvents)
+import App.Interface.SecureDevice (KeyAlias(..), authenticateUser, generateSecureKey, generateSecureKeyWithUserAuth, isDeviceSecure, secureDecrypt, secureEncrypt)
+import App.Interface.WebScripter (Script(..), ScriptStep(..), ScripterId(..), createScripter, executeScripter, hideScripter, killScripter, showScripter)
 
 main :: Effect Unit
 main = do
