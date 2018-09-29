@@ -1,4 +1,4 @@
-exports._setupInterface = function() {
+exports.setupInterface = function() {
 
   window.InterfaceCallbacks = {}
   callbackId = 0;
@@ -28,62 +28,6 @@ exports._setupInterface = function() {
   })
 }
 
-exports._spawnWebScripter = function(id, callback) {
-  Interface.spawnWebScripter(id, callback)
-}
-
-exports._killScripter = function(id) {
-  Interface.killScripter(id);
-}
-
-exports._executeScripter = function(id, script, success, error) {
-  var success1 = function() {
-    console.log(arguments);
-    success(arguments[0]);
-  }
-  Interface.executeScripter(id, script, success1, error)
-}
-
-exports._cancelScripter = function (id) {
-  Interface.cancelScripter(id);
-};
-
-exports._showScripter = function(id) {
-  Interface.showScripter(id);
-}
-
-exports._hideScripter = function (id) {
-  Interface.hideScripter(id);
-};
-
-exports._isDeviceSecure = function () {
-  return Interface.isDeviceSecure();
-};
-
-exports._isUserAuthenticated = function() {
-  return Interface.isUserAuthenticated();
-}
-
-exports._authenticateUser = function (success, error) {
-  Interface.authenticateUser(success, error);
-};
-
-exports._generateSecureKey = function (keyAlias, success, error) {
-  Interface.generateSecureKey(keyAlias, success, error);
-};
-
-exports._generateSecureKeyWithUserAuth = function (keyAlias, validFor, success, error) {
-  Interface.generateSecureKeyWithUserAuth(keyAlias, validFor, success, error);
-};
-
-exports._secureEncrypt = function (data, keyAlias, success, error) {
-  Interface.secureEncrypt(data, keyAlias, success, error);
-};
-
-exports._secureDecrypt = function (data, keyAlias, success, error) {
-  Interface.secureDecrypt(data, keyAlias, success, error);
-};
-
-exports._exit = function () {
+exports.exit = function () {
   Interface.exit();
 };

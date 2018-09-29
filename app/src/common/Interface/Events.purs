@@ -1,4 +1,7 @@
-module Interface.Events where
+module Interface.Events (
+    Event
+  , setupEvents
+  ) where
 
 import Prelude
 

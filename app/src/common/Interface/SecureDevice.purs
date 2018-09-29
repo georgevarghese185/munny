@@ -16,12 +16,12 @@ import Data.Either (Either(..), fromRight)
 import Data.Newtype (class Newtype)
 import Data.String.Regex (Regex, regex, test)
 import Data.String.Regex.Flags (noFlags)
+import Effect (Effect)
 import Effect.Aff (Aff, makeAff, nonCanceler)
 import Effect.Class (liftEffect)
-import Effect.Uncurried (mkEffectFn1, runEffectFn2, runEffectFn3, runEffectFn4)
+import Effect.Uncurried (EffectFn1, EffectFn2, EffectFn3, EffectFn4, mkEffectFn1, runEffectFn2, runEffectFn3, runEffectFn4)
 import Foreign (ForeignError(..), fail, readString)
 import Foreign.Class (class Decode, class Encode, encode)
-import Interface (_authenticateUser, _generateSecureKey, _generateSecureKeyWithUserAuth, _isDeviceSecure, _isUserAuthenticated, _secureDecrypt, _secureEncrypt)
 import Partial.Unsafe (unsafePartial)
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -31,6 +31,13 @@ derive instance newtypeKeyAlias :: Newtype KeyAlias _
 
 
 foreign import data Cipher :: Type
+foreign import isDeviceSecureImpl :: Effect Boolean
+foreign import isUserAuthenticatedImpl :: Effect Boolean
+foreign import authenticateUserImpl :: EffectFn2 (Effect Unit) (EffectFn1 String Unit) Unit
+foreign import generateSecureKeyImpl :: EffectFn3 String (Effect Unit) (EffectFn1 String Unit) Unit
+foreign import generateSecureKeyWithUserAuthImpl :: EffectFn4 String Int (Effect Unit) (EffectFn1 String Unit) Unit
+foreign import secureEncryptImpl :: EffectFn4 String String (EffectFn1 String Unit) (EffectFn1 String Unit) Unit
+foreign import secureDecryptImpl :: EffectFn4 String String (EffectFn1 String Unit) (EffectFn1 String Unit) Unit
 
 toCipher :: String -> Cipher
 toCipher = unsafeCoerce
@@ -57,21 +64,21 @@ instance decodeCipher :: Decode Cipher where
 
 
 isDeviceSecure :: Aff Boolean
-isDeviceSecure = liftEffect _isDeviceSecure
+isDeviceSecure = liftEffect isDeviceSecureImpl
 
 isUserAuthenticated :: Aff Boolean
-isUserAuthenticated = liftEffect _isUserAuthenticated
+isUserAuthenticated = liftEffect isUserAuthenticatedImpl
 
 authenticateUser :: Aff (Either String Unit)
 authenticateUser =
-  makeAff (\cb -> runEffectFn2 _authenticateUser
+  makeAff (\cb -> runEffectFn2 authenticateUserImpl
                     (cb $ Right $ Right unit)
                     (mkEffectFn1 $ Left >>> Right >>> cb)
                     *> pure nonCanceler)
 
 generateSecureKey :: KeyAlias -> Aff (Either String Unit)
 generateSecureKey (KeyAlias keyAlias) =
-  makeAff (\cb -> runEffectFn3 _generateSecureKey
+  makeAff (\cb -> runEffectFn3 generateSecureKeyImpl
                     keyAlias
                     (cb $ Right $ Right unit)
                     (mkEffectFn1 $ Left >>> Right >>> cb)
@@ -79,7 +86,7 @@ generateSecureKey (KeyAlias keyAlias) =
 
 generateSecureKeyWithUserAuth :: KeyAlias -> Int -> Aff (Either String Unit)
 generateSecureKeyWithUserAuth (KeyAlias keyAlias) authValidSeconds =
- makeAff (\cb -> runEffectFn4 _generateSecureKeyWithUserAuth
+ makeAff (\cb -> runEffectFn4 generateSecureKeyWithUserAuthImpl
                   keyAlias
                   authValidSeconds
                   (cb $ Right $ Right unit)
@@ -88,7 +95,7 @@ generateSecureKeyWithUserAuth (KeyAlias keyAlias) authValidSeconds =
 
 secureEncrypt :: String -> KeyAlias -> Aff (Either String Cipher)
 secureEncrypt text (KeyAlias keyAlias) =
-  makeAff (\cb -> runEffectFn4 _secureEncrypt
+  makeAff (\cb -> runEffectFn4 secureEncryptImpl
                     text
                     keyAlias
                     (mkEffectFn1 $ toCipher >>> Right >>> Right >>> cb)
@@ -97,7 +104,7 @@ secureEncrypt text (KeyAlias keyAlias) =
 
 secureDecrypt :: Cipher -> KeyAlias -> Aff (Either String String)
 secureDecrypt cipher (KeyAlias keyAlias) =
-  makeAff (\cb -> runEffectFn4 _secureDecrypt
+  makeAff (\cb -> runEffectFn4 secureDecryptImpl
                     (fromCipher cipher)
                     keyAlias
                     (mkEffectFn1 $ Right >>> Right >>> cb)
