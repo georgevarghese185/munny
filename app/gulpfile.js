@@ -84,9 +84,6 @@ gulp.task('init', async function() {
 
 const PULP_OUTPUT = 'output'
 const PURS_PLUGINS_OUTPUT = 'output/_bundled';
-const PURS_PLUGIN_START_CODE = `
-window.PLUGINS.loadPlugin('{{pluginName}}', PS.start);
-`
 
 gulp.task('purs-compile', ['init'], async function() {
   await spawnAndWait('pulp', ['build', '--build-path', `${PULP_OUTPUT}`]);
@@ -103,8 +100,11 @@ gulp.task('purs-bundle', ['purs-compile'], async function() {
 })
 
 const bundlePursPlugins = async (pluginName, pluginModule) => {
-  await spawnAndWait('purs', ['bundle', `${PULP_OUTPUT}/**/*.js`, `--module`, `${pluginModule}`, `--output`, `${PURS_PLUGINS_OUTPUT}/${pluginName}/index.js`]);
-  await appendFile(`${PURS_PLUGINS_OUTPUT}/${pluginName}/index.js`, PURS_PLUGIN_START_CODE.replace("{{pluginName}}", pluginName))
+  await spawnAndWait('purs', ['bundle',
+    `${PULP_OUTPUT}/**/*.js`,
+    `--module`, `${pluginModule}`,
+    '--main', pluginModule,
+    `--output`, `${PURS_PLUGINS_OUTPUT}/${pluginName}/index.js`]);
 }
 
 //================================ HELPERS =====================================
