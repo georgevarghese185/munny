@@ -96,7 +96,7 @@ const PULP_OUTPUT = 'output'
 const PURS_PLUGINS_OUTPUT = 'output/_bundled';
 
 gulp.task('purs-compile', ['init'], async function() {
-  await spawnAndWait('pulp', ['build', '--build-path', `${PULP_OUTPUT}`]);
+  await spawnAndWait('node_modules/.bin/pulp', ['build', '--build-path', `${PULP_OUTPUT}`]);
 });
 
 gulp.task('purs-bundle', ['purs-compile'], async function() {
@@ -110,7 +110,7 @@ gulp.task('purs-bundle', ['purs-compile'], async function() {
 })
 
 const bundlePursPlugins = async (pluginName, pluginModule) => {
-  await spawnAndWait('purs', ['bundle',
+  await spawnAndWait('node_modules/.bin/purs', ['bundle',
     `${PULP_OUTPUT}/**/*.js`,
     `--module`, `${pluginModule}`,
     '--main', pluginModule,
