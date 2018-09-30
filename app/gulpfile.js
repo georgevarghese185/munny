@@ -34,9 +34,20 @@ gulp.task('serve', ['build'], serve({
   hostname: "localhost"
 }));
 
-gulp.task('build', ['init', 'webpack'])
+gulp.task('build', ['init', 'purs-bundle'], function() {
+  return webpackBuild(false);
+})
 
-gulp.task('webpack', ['init', 'purs-bundle'], function() {
+gulp.task('build-prod', ['init', 'purs-bundle'], function() {
+  return webpackBuild(true);
+})
+
+gulp.task('init', async function() {
+  await buildInfo.init();
+})
+
+
+const webpackBuild = function(prod) {
   let entry = {}
   buildInfo.plugins.map(plugin => {
     if(plugin.build.type === "js") {
@@ -48,7 +59,7 @@ gulp.task('webpack', ['init', 'purs-bundle'], function() {
 
   return gulp.src(['src/**/*.js', 'src/**/*.vue', `${PURS_PLUGINS_OUTPUT}/*/*.js`])
     .pipe(webpack({
-      mode: 'development',
+      mode: prod ? 'production' : 'development',
       entry,
       output: {
         path: path.resolve(__dirname, 'dist'),
@@ -84,11 +95,9 @@ gulp.task('webpack', ['init', 'purs-bundle'], function() {
       ]
     }))
     .pipe(gulp.dest('dist/'))
-})
+}
 
-gulp.task('init', async function() {
-  await buildInfo.init();
-})
+
 
 //======================= PURESCRIPT BUILD STEP ================================
 
