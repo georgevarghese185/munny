@@ -18,7 +18,7 @@ import Effect.Exception (throw, throwException)
 import Effect.Uncurried (EffectFn1, EffectFn2, EffectFn3, mkEffectFn1, mkEffectFn2, mkEffectFn3, mkEffectFn4, runEffectFn1, runEffectFn2, runEffectFn3)
 import Foreign (Foreign, unsafeToForeign)
 import Web.DOM.Document (Document)
-import Web.DOM.Document (createElement, toNode, toNonElementParentNode, toParentNode) as Document
+import Web.DOM.Document (createElement, toNonElementParentNode, toParentNode) as Document
 import Web.DOM.Element (setId, toNode)
 import Web.DOM.Node (appendChild, removeChild)
 import Web.DOM.NonElementParentNode (getElementById)
