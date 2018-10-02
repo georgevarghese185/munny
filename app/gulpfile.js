@@ -25,7 +25,7 @@ const buildInfo = {
 }
 
 gulp.task('debug', ['serve'], function() {
-  gulp.watch('src/**/*', ['build'])
+  return gulp.watch(['src/**/*', `${PULP_OUTPUT}/**/*.js`, `!${PURS_PLUGINS_OUTPUT}/**/*.js`], ['build'])
 })
 
 gulp.task('serve', ['build'], serve({
