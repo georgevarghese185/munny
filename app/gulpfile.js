@@ -51,7 +51,7 @@ const webpackBuild = function(prod) {
   let entry = {}
   buildInfo.plugins.map(plugin => {
     if(plugin.build.type === "js") {
-      entry[plugin.name] = `${__dirname}/${PLUGINS_SOURCE}/${plugin.name}/${plugin.entry}`
+      entry[plugin.name] = `${__dirname}/${PLUGINS_SOURCE}/${plugin.name}/${plugin.build.entry}`
     } else {
       entry[plugin.name] = `${__dirname}/${PURS_PLUGINS_OUTPUT}/${plugin.name}/index.js`
     }
