@@ -94,6 +94,10 @@ const webpackBuild = function(prod) {
         new VueLoaderPlugin()
       ]
     }))
+    .on('error', function(err) {
+      console.log(err);
+      this.emit('end');
+    })
     .pipe(gulp.dest('dist/'))
 }
 
