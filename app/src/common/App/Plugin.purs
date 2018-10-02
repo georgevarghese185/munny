@@ -8,25 +8,27 @@ module App.Plugin (
 import Prelude
 
 import Control.Monad.Except (ExceptT, catchError, throwError)
-import Control.Monad.Maybe.Trans (lift)
+import Control.Monad.Maybe.Trans (MaybeT(..), lift, runMaybeT)
 import Data.Either (Either(..), either)
-import Data.Maybe (maybe)
+import Data.Maybe (Maybe, maybe)
 import Effect (Effect)
 import Effect.Aff (Aff, Error, error, makeAff, nonCanceler, runAff_)
 import Effect.Class (liftEffect)
-import Effect.Exception (throw)
+import Effect.Exception (throw, throwException)
 import Effect.Uncurried (EffectFn1, EffectFn2, EffectFn3, mkEffectFn1, mkEffectFn2, mkEffectFn3, mkEffectFn4, runEffectFn1, runEffectFn2, runEffectFn3)
 import Foreign (Foreign, unsafeToForeign)
 import Web.DOM.Document (Document)
-import Web.DOM.Document (createElement, toNode, toNonElementParentNode) as Document
+import Web.DOM.Document (createElement, toNode, toNonElementParentNode, toParentNode) as Document
 import Web.DOM.Element (setId, toNode)
 import Web.DOM.Node (appendChild, removeChild)
 import Web.DOM.NonElementParentNode (getElementById)
+import Web.DOM.ParentNode (QuerySelector(..), querySelector)
 import Web.Event.Event (EventType(..))
 import Web.Event.EventTarget (addEventListener, eventListener)
-import Web.HTML (HTMLScriptElement)
+import Web.HTML (HTMLHeadElement, HTMLScriptElement)
 import Web.HTML as HTML
 import Web.HTML.HTMLDocument (toDocument) as Document
+import Web.HTML.HTMLHeadElement as Head
 import Web.HTML.HTMLScriptElement as Script
 import Web.HTML.Window as Window
 
@@ -42,7 +44,10 @@ foreign import pluginReadyImpl :: EffectFn2 String StartFn Unit
 getDocument :: Effect Document
 getDocument = Document.toDocument <$> (HTML.window >>= Window.document)
 
-
+getHead :: Document -> Effect (Maybe HTMLHeadElement)
+getHead document = runMaybeT do
+  element <- MaybeT $ querySelector (QuerySelector "head") (Document.toParentNode document)
+  MaybeT $ pure $ Head.fromElement element
 
 initialize :: Effect Unit
 initialize = runEffectFn1 setPluginsObjectImpl $ unsafeToForeign {
@@ -82,13 +87,17 @@ loadPlugin_ pluginName input = do
     loadPluginScript script cb = do
       document <- getDocument
       errorListener <- eventListener $ \_ -> cb $ Left $ scriptLoadErr
+      head <- maybe (throwException headError) pure =<< getHead document
       addEventListener (EventType "error") errorListener true (Script.toEventTarget script)
       runEffectFn1 waitForPluginReady (mkEffectFn2 $
         \name startFn -> if name == pluginName then cb (Right startFn) else pure unit)
-      void $ appendChild (Script.toNode script) (Document.toNode document)
+      void $ appendChild (Script.toNode script) (Head.toNode head)
       where
       scriptLoadErr :: Error
       scriptLoadErr = error "Failed to load script"
+
+      headError :: Error
+      headError = error "Failed to get head element"
 
     startPlugin :: StartFn -> Aff Foreign
     startPlugin startFn = makeAff $ \cb -> do
@@ -100,10 +109,11 @@ loadPlugin_ pluginName input = do
 
 
 unloadPlugin :: String -> Effect Unit
-unloadPlugin pluginName = do
-  document <- getDocument
-  mScript <- getElementById pluginName (Document.toNonElementParentNode document)
-  maybe (pure unit) (\s -> void $ removeChild (toNode s) (Document.toNode document)) mScript
+unloadPlugin pluginName = void $ runMaybeT do
+  document <- lift $ getDocument
+  head <- MaybeT $ getHead document
+  script <- MaybeT $ getElementById pluginName (Document.toNonElementParentNode document)
+  lift $ removeChild (toNode script) (Head.toNode head)
 
 
 pluginReady :: String -> (Foreign -> Aff Foreign) -> (Effect Unit)
