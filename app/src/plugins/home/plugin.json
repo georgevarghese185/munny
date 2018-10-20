@@ -1,0 +1,10 @@
+{
+  "name": "home",
+  "type": ["main"],
+  "inputs": ["ui"],
+  "outputs": [],
+  "build": {
+    "entry": "Plugin.Home.Main",
+    "type": "purs"
+  }
+}

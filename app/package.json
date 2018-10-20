@@ -22,6 +22,7 @@
     "vue": "^2.5.17",
     "vue-loader": "^15.4.2",
     "vue-template-compiler": "^2.5.17",
-    "webpack-stream": "^5.1.1"
+    "webpack-stream": "^5.1.1",
+    "xhr2": "^0.1.4"
   }
 }

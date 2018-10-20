@@ -1,10 +1,7 @@
 {
   "name": "boot",
-  "type": "boot",
-  "ui": {
-    "type": "screen"
-  },
-  "inputs": ["ui"],
+  "type": ["boot"],
+  "inputs": [],
   "outputs": [],
   "build": {
     "entry": "Plugin.Boot.Main",
