@@ -77,7 +77,7 @@ loadPlugin_ pluginName input = do
       mScript <- Script.fromElement <$> Document.createElement "script" document
       script <- maybe (throw scriptElementErr) pure mScript
       setId pluginName (Script.toElement script)
-      Script.setSrc ("file:///android_asset/" <> pluginName <> "/index.js") script
+      Script.setSrc (pluginName <> "/index.js") script
       pure script
       where
       scriptElementErr :: String

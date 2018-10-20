@@ -1,12 +1,12 @@
 package none.george.munny.webui;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.net.Uri;
 import android.security.keystore.UserNotAuthenticatedException;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -17,30 +17,28 @@ import android.util.Log;
 import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import none.george.munny.BuildConfig;
-import none.george.munny.java.util.StringJoiner;
 
 import none.george.munny.Listener;
 import none.george.munny.R;
 import none.george.munny.webscripter.Script;
 import none.george.munny.webscripter.WebScripter;
+import none.george.munny.webui.utilities.AppServer;
 import none.george.munny.webui.utilities.Secrets;
 import none.george.munny.webui.utilities.SmsReader;
 
 public class WebUIActivity extends AppCompatActivity {
-    private static final String START_URL = "file:///android_asset/index.html";
 
     private WebView uiView;
     private Map<String, WebScripter> webScripters;
@@ -50,6 +48,7 @@ public class WebUIActivity extends AppCompatActivity {
     private String smsCallback;
     private long smsNewerThan;
     private String visibleScripter;
+    private AppServer appServer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,10 +61,55 @@ public class WebUIActivity extends AppCompatActivity {
 
         webScripters = new HashMap<>();
         uiView = WebScripter.setupWebView(findViewById(R.id.ui_web_view));
-        uiView.setWebViewClient(new WebScripter.AssetClient());
+        uiView.setWebViewClient(new WebViewClient());
         uiView.addJavascriptInterface(this, "__Native_Interface");
-        uiView.loadUrl(START_URL);
+
+        if(BuildConfig.DEBUG) {
+            waitForDevServer();
+        } else {
+            startAppServer();
+        }
     }
+
+
+    private void waitForDevServer() {
+        final String url = getString(R.string.debug_url) + "/index.html";
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Waiting for Dev server")
+                .setMessage("Looking for start page on " + url)
+                .setCancelable(false)
+                .create();
+        dialog.show();
+
+        AppServer.waitForDevServer(url, new Listener<Void>() {
+            @Override
+            public void on(Void result) {
+                runOnUiThread(() -> {
+                    dialog.hide();
+                    uiView.loadUrl(url);
+                });
+            }
+
+            @Override
+            public void error(Exception e) {
+                Log.e("WebUIActivity", "Error while waiting for dev server", e);
+            }
+        });
+    }
+
+    private void startAppServer() {
+        try {
+            appServer = new AppServer(this);
+            String port = String.valueOf(appServer.getPort());
+            uiView.loadUrl("http://localhost:" + port + "/index.html");
+        } catch (Exception e) {
+            Log.e("WebUIActivity", "Error while starting app server", e);
+            finish();
+        }
+    }
+
+
 
     @JavascriptInterface
     public void spawnWebScripter(String id, String callback) {
@@ -388,11 +432,6 @@ public class WebUIActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         callback("onResume");
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
     }
 
     @Override

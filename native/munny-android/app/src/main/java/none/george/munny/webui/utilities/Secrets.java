@@ -1,18 +1,11 @@
 package none.george.munny.webui.utilities;
 
-import android.app.Activity;
-import android.app.KeyguardManager;
-import android.content.Context;
-import android.content.Intent;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.Base64;
 
-import org.json.JSONObject;
-
 import java.security.KeyStore;
-import java.security.UnrecoverableKeyException;
-import java.security.spec.AlgorithmParameterSpec;
+
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
