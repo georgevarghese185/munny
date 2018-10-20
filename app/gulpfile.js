@@ -8,7 +8,7 @@ const path = require('path');
 const spawn = require('child_process').spawn;
 
 const PLUGINS_SOURCE = "src/plugins";
-
+const OUTPUT = "dist";
 
 //Info required for building
 const buildInfo = {
@@ -21,6 +21,14 @@ const buildInfo = {
       let contents = await readFile(metaFile);
       return JSON.parse(contents);
     }));
+    await this.buildMetaFile();
+  },
+  buildMetaFile: async function() {
+    var meta = {
+      plugins: this.plugins
+    }
+
+    await writeFile(`${OUTPUT}/meta.json`, JSON.stringify(meta, null, 2));
   }
 }
 
@@ -29,7 +37,7 @@ gulp.task('debug', ['serve'], function() {
 })
 
 gulp.task('serve', ['build'], serve({
-  root: ['dist'],
+  root: [OUTPUT],
   port: 8080,
   hostname: "localhost"
 }));
@@ -148,9 +156,9 @@ const readFile = async function(filePath) {
 }
 
 //Append to a file using a Promise (for async/await)
-const appendFile = async function(filePath, data) {
+const writeFile = async function(filePath, data) {
   return new Promise(function(resolve, reject) {
-    fs.appendFile(filePath, data, (err, contents) => {
+    fs.writeFile(filePath, data, (err, contents) => {
       if(err) {
         reject(err);
       } else {

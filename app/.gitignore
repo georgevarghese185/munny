@@ -8,3 +8,4 @@
 /.purs*
 /.psa*
 /dist/**/index.js
+/dist/meta.json
