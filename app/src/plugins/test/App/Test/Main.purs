@@ -20,9 +20,9 @@ main = do
 
 app :: Aff Unit
 app = do
-  scripterTest
-  authTest
-  encryptionTest
+  -- scripterTest
+  -- authTest
+  -- encryptionTest
   deviceSecure <- isDeviceSecure
   warn $ "Device Secure: " <> show deviceSecure
   if deviceSecure then authEncryptionTest else error $ "Can't test auth encryption"

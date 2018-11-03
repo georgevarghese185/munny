@@ -1,0 +1,10 @@
+{
+  "name": "test",
+  "type": [],
+  "inputs": [],
+  "outputs": [],
+  "build": {
+    "entry": "App.Test.Main",
+    "type": "purs"
+  }
+}
