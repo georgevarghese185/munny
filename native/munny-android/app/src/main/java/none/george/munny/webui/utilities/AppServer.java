@@ -2,7 +2,7 @@ package none.george.munny.webui.utilities;
 
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.Log;
 
 import org.json.JSONObject;

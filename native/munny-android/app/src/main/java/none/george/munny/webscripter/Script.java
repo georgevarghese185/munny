@@ -3,7 +3,7 @@ package none.george.munny.webscripter;
 import android.net.http.SslError;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.webkit.JavascriptInterface;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebResourceError;
@@ -208,7 +208,7 @@ public class Script {
             hashMap.put("ERROR_RESPONSE_EXCEPTION", e.toString());
             hashMap.put("INCOMPLETE_ERROR_RESPONSE", error.toString());
 
-            return error;
+            return new JSONObject(hashMap);
         } finally {
             if(reader != null) {
                 try {

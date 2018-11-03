@@ -7,7 +7,7 @@ import android.database.Cursor;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Telephony.Sms.Inbox;
-import android.support.v4.content.ContextCompat;
+import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 import java.util.List;
