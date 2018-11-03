@@ -10,18 +10,10 @@ exports.authenticateUserImpl = function (success, error) {
   Interface.authenticateUser(success, error);
 };
 
-exports.generateSecureKeyImpl = function (keyAlias, success, error) {
-  Interface.generateSecureKey(keyAlias, success, error);
+exports.secureEncryptImpl = function (data, keyAlias, success, error, authorized) {
+  Interface.secureEncrypt(data, keyAlias, success, error, authorized);
 };
 
-exports.generateSecureKeyWithUserAuthImpl = function (keyAlias, validFor, success, error) {
-  Interface.generateSecureKeyWithUserAuth(keyAlias, validFor, success, error);
-};
-
-exports.secureEncryptImpl = function (data, keyAlias, success, error) {
-  Interface.secureEncrypt(data, keyAlias, success, error);
-};
-
-exports.secureDecryptImpl = function (data, keyAlias, success, error) {
-  Interface.secureDecrypt(data, keyAlias, success, error);
+exports.secureDecryptImpl = function (data, keyAlias, success, error, authorized) {
+  Interface.secureDecrypt(data, keyAlias, success, error, authorized);
 };
