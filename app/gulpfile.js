@@ -166,7 +166,10 @@ gulp.task('init', initPlugins);
 // build purescript plugins
 gulp.task('purescript-build', ['init'], buildPurescript);
 
-// build plugin js bundles
+// build plugin js bundles without optimizations
+gulp.task('webpack-build-dev', ['purescript-build'], () => webpackBuild(false));
+
+// build plugin js bundles with optimizations
 gulp.task('webpack-build', ['purescript-build'], () => webpackBuild(true));
 
 // serve plugin js bundles
@@ -186,6 +189,9 @@ gulp.task('watch', ['webpack-serve'], async () => {
 
 // Build and run debug server
 gulp.task('debug', ['watch'])
+
+// Build all plugins without optimizations (debug build without needing a server)
+gulp.task('build-dev', ['webpack-build-dev'])
 
 // Build all plugins for production
 gulp.task('build-prod', ['webpack-build'])

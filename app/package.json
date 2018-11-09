@@ -4,6 +4,7 @@
   "scripts": {
     "start": "gulp debug",
     "build": "gulp build-prod && npm run clear-assets && npm run copy-assets",
+    "build-dev": "gulp build-dev && npm run clear-assets && npm run copy-assets",
     "clear-assets": "rm -rf ../native/munny-android/app/src/main/assets/app",
     "copy-assets": "mkdir ../native/munny-android/app/src/main/assets/app && cp -R dist/* ../native/munny-android/app/src/main/assets/app"
   },
