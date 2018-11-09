@@ -1,145 +1,198 @@
 const gulp = require('gulp');
 const serve = require('gulp-serve')
 const glob = require('glob');
-const webpack = require('webpack-stream')
+const webpack = require('webpack')
+const webpackStream = require('webpack-stream')
+const WebpackDevServer = require('webpack-dev-server')
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const fs = require('fs')
 const path = require('path');
 const spawn = require('child_process').spawn;
 
+
+
+//======================== Constants and plugin info ============================
+
+
 const PLUGINS_SOURCE = "src/plugins";
 const OUTPUT = "dist";
+const PULP_OUTPUT = 'output'
+const PURS_PLUGINS_OUTPUT = 'output/_bundled';
 
-//Info required for building
-const buildInfo = {
-  plugins: [],
+//Meta data of all available plugins. Initialize using `initPlugins()`
+var PLUGINS = []
 
-  //add the meta.json of all plugins to the `plugins` array
-  init: async function() {
-    let metaFiles = await getFiles(`${PLUGINS_SOURCE}/*/plugin.json`);
-    this.plugins = await Promise.all(metaFiles.map(async (metaFile) => {
-      let contents = await readFile(metaFile);
-      return JSON.parse(contents);
-    }));
-    await this.buildMetaFile();
-  },
-  buildMetaFile: async function() {
-    var meta = {
-      plugins: this.plugins
-    }
 
-    await writeFile(`${OUTPUT}/meta.json`, JSON.stringify(meta, null, 2));
+
+//======================== Build Functions ====================================
+
+
+// Initialize `PLUGINS` array with meta data of each plugin (taken from 'plugin_folder/plugin.json') and create meta.json file in output directory
+const initPlugins = async function() {
+  let metaFiles = await getFiles(`${PLUGINS_SOURCE}/*/plugin.json`);
+  PLUGINS = await Promise.all(metaFiles.map(async (metaFile) => {
+    let contents = await readFile(metaFile);
+    return JSON.parse(contents);
+  }));
+
+  var meta = {
+    plugins: PLUGINS
   }
+
+  await writeFile(`${OUTPUT}/meta.json`, JSON.stringify(meta, null, 2));
 }
 
-gulp.task('debug', ['serve'], function() {
-  return gulp.watch(['src/**/*', `${PULP_OUTPUT}/**/*.js`, `!${PURS_PLUGINS_OUTPUT}/**/*.js`], ['build'])
-})
-
-gulp.task('serve', ['build'], serve({
-  root: [OUTPUT],
-  port: 8080,
-  hostname: "localhost"
-}));
-
-gulp.task('build', ['init', 'purs-bundle'], function() {
-  return webpackBuild(false);
-})
-
-gulp.task('build-prod', ['init', 'purs-bundle'], function() {
-  return webpackBuild(true);
-})
-
-gulp.task('init', async function() {
-  await buildInfo.init();
-})
-
-
+// Build the final bundled js files for each pluign
 const webpackBuild = function(prod) {
+  return gulp.src(['src/**/*.js', 'src/**/*.vue', `${PURS_PLUGINS_OUTPUT}/*/*.js`])
+    .pipe(webpackCompiler(webpackStream, prod))
+    .on('error', function(err) {
+      console.log(err);
+      this.emit('end');
+    })
+    .pipe(gulp.dest(`${OUTPUT}/`))
+}
+
+// Start dev server to build plugins serve output folder
+const webpackServer = function() {
   let entry = {}
-  buildInfo.plugins.map(plugin => {
+  PLUGINS.map(plugin => {
     if(plugin.build.type === "js") {
       entry[plugin.name] = `${__dirname}/${PLUGINS_SOURCE}/${plugin.name}/${plugin.build.entry}`
     } else {
       entry[plugin.name] = `${__dirname}/${PURS_PLUGINS_OUTPUT}/${plugin.name}/index.js`
     }
-  })
+  });
 
-  return gulp.src(['src/**/*.js', 'src/**/*.vue', `${PURS_PLUGINS_OUTPUT}/*/*.js`])
-    .pipe(webpack({
-      mode: prod ? 'production' : 'development',
-      entry,
-      output: {
-        path: path.resolve(__dirname, 'dist'),
-        filename: '[name]/index.js'
-      },
-      module:{
-        rules: [
-          {
-            test: /\.vue$/,
-            loader: 'vue-loader'
-          },
-          {
-            test: /\.js$/,
-            loader: 'babel-loader'
-          },
-          {
-            test: /\.css$/,
-            use: [
-              'vue-style-loader',
-              'css-loader'
-            ]
-          }
-        ]
-      },
-      resolve: {
-        modules: [
-          "node_modules",
-          __dirname
-        ]
-      },
-      plugins: [
-        new VueLoaderPlugin()
-      ]
-    }))
-    .on('error', function(err) {
-      console.log(err);
-      this.emit('end');
+  let compiler = webpackCompiler(webpack, false)
+
+  return new WebpackDevServer(compiler, {
+      contentBase: path.join(__dirname, `${OUTPUT}`)
     })
-    .pipe(gulp.dest('dist/'))
+    .listen(8080, "localhost", function(err) {
+  		if(err) {
+        console.error(err);
+      }
+	});
 }
 
+// Returns a compiler object using the provided webpack function
+const webpackCompiler = function(webpack, prod) {
+  let entry = {}
+  PLUGINS.map(plugin => {
+    if(plugin.build.type === "js") {
+      entry[plugin.name] = `${__dirname}/${PLUGINS_SOURCE}/${plugin.name}/${plugin.build.entry}`
+    } else {
+      entry[plugin.name] = `${__dirname}/${PURS_PLUGINS_OUTPUT}/${plugin.name}/index.js`
+    }
+  });
 
+  let config = {
+    mode: prod ? 'production' : 'development',
+    entry,
+    output: {
+      path: path.resolve(__dirname, `${OUTPUT}`),
+      filename: '[name]/index.js'
+    },
+    module:{
+      rules: [
+        {
+          test: /\.vue$/,
+          loader: 'vue-loader'
+        },
+        {
+          test: /\.js$/,
+          loader: 'babel-loader'
+        },
+        {
+          test: /\.css$/,
+          use: [
+            'vue-style-loader',
+            'css-loader'
+          ]
+        }
+      ]
+    },
+    resolve: {
+      modules: [
+        "node_modules",
+        __dirname
+      ]
+    },
+    plugins: [
+      new VueLoaderPlugin()
+    ]
+  }
 
-//======================= PURESCRIPT BUILD STEP ================================
+  return webpack(config);
+}
 
-const PULP_OUTPUT = 'output'
-const PURS_PLUGINS_OUTPUT = 'output/_bundled';
+// Build all PureScript modules and bundle each purescript plugin
+const buildPurescript = async function() {
+  await compilePurescript();
+  console.log("Bundling PureScript plugins...")
+  await bundlePurescript();
+  console.log("Bundled")
+}
 
-gulp.task('purs-compile', ['init'], async function() {
+// Compile all purescript modules
+const compilePurescript = async function() {
   await spawnAndWait('node_modules/.bin/pulp', ['build', '--build-path', `${PULP_OUTPUT}`]);
-});
+}
 
-gulp.task('purs-bundle', ['purs-compile'], async function() {
+// Bundle all purescript plugins
+const bundlePurescript = async function() {
   await Promise.all(
-    buildInfo.plugins
+    PLUGINS
       .filter(plugin => plugin.build.type === "purs")
       .map(async plugin => {
-        await bundlePursPlugins(plugin.name, plugin.build.entry)
+        await spawnAndWait('node_modules/.bin/purs', ['bundle',
+          `${PULP_OUTPUT}/**/*.js`,
+          `--module`, `${plugin.build.entry}`,
+          '--main', plugin.build.entry,
+          `--output`, `${PURS_PLUGINS_OUTPUT}/${plugin.name}/index.js`]);
       }
   ))
-})
-
-const bundlePursPlugins = async (pluginName, pluginModule) => {
-  await spawnAndWait('node_modules/.bin/purs', ['bundle',
-    `${PULP_OUTPUT}/**/*.js`,
-    `--module`, `${pluginModule}`,
-    '--main', pluginModule,
-    `--output`, `${PURS_PLUGINS_OUTPUT}/${pluginName}/index.js`]);
 }
 
-//================================ HELPERS =====================================
 
+
+//================================= Gulp Tasks ================================
+
+
+// initalize `PLUGINS` with all plugins meta data
+gulp.task('init', initPlugins);
+
+// build purescript plugins
+gulp.task('purescript-build', ['init'], buildPurescript);
+
+// build plugin js bundles
+gulp.task('webpack-build', ['purescript-build'], () => webpackBuild(true));
+
+// serve plugin js bundles
+gulp.task('webpack-serve', ['purescript-build'], () => webpackServer());
+
+// watch all purescript directories for changes. Rebuild purescript on change
+gulp.task('watch', ['webpack-serve'], async () => {
+  var watchDirs = [];
+  let pursFiles = await getFiles('src/**/*.purs');
+  pursFiles.map(file => {
+    let dir = file.substring(0, file.lastIndexOf('/'));
+    let glob = `${dir}/*`;
+    if(watchDirs.indexOf(glob) == -1) watchDirs.push(glob);
+  });
+  return gulp.watch(watchDirs, ['purescript-build'])
+})
+
+// Build and run debug server
+gulp.task('debug', ['watch'])
+
+// Build all plugins for production
+gulp.task('build-prod', ['webpack-build'])
+
+
+
+//================================ HELPERS =====================================
 
 
 //Read a file as a promise (to use with async/await)
