@@ -44,17 +44,8 @@ const initPlugins = async function() {
 
 // Build the final bundled js files for each pluign
 const webpackBuild = function(prod) {
-  let entryPoints = {}
-  PLUGINS.map(plugin => {
-    if(plugin.build.type === "js") {
-      entryPoints[plugin.name] = `${__dirname}/${PLUGINS_SOURCE}/${plugin.name}/${plugin.build.entry}`
-    } else {
-      entryPoints[plugin.name] = `${__dirname}/${PURS_PLUGINS_OUTPUT}/${plugin.name}/index.js`
-    }
-  });
-
   return gulp.src([`${SOURCE}/**/*.js`, `${SOURCE}/**/*.vue`, `${PURS_PLUGINS_OUTPUT}/*/*.js`])
-    .pipe(webpackCompiler(webpackStream, entryPoints, prod))
+    .pipe(webpackCompiler(webpackStream, prod))
     .on('error', function(err) {
       console.log(err);
       this.emit('end');
@@ -64,16 +55,7 @@ const webpackBuild = function(prod) {
 
 // Start dev server to build plugins serve output folder
 const webpackServe = function() {
-  let entryPoints = {}
-  PLUGINS.map(plugin => {
-    if(plugin.build.type === "js") {
-      entryPoints[plugin.name] = `${__dirname}/${PLUGINS_SOURCE}/${plugin.name}/${plugin.build.entry}`
-    } else {
-      entryPoints[plugin.name] = `${__dirname}/${PURS_OUTPUT}/${plugin.build.entry}/index.js`
-    }
-  });
-
-  let compiler = webpackCompiler(webpack, entryPoints, false)
+  let compiler = webpackCompiler(webpack, false)
 
   let server = new WebpackDevServer(compiler, {
     contentBase: path.join(__dirname, `${OUTPUT}`)
@@ -87,10 +69,19 @@ const webpackServe = function() {
 }
 
 // Returns a compiler object using the provided webpack function
-const webpackCompiler = function(webpack, entryPoints, isProd) {
+const webpackCompiler = function(webpack, isProd) {
+  let entry = {}
+  PLUGINS.map(plugin => {
+    if(plugin.build.type === "js") {
+      entry[plugin.name] = `${__dirname}/${PLUGINS_SOURCE}/${plugin.name}/${plugin.build.entry}`
+    } else {
+      entry[plugin.name] = `${__dirname}/${PURS_PLUGINS_OUTPUT}/${plugin.name}`
+    }
+  });
+
   let config = {
     mode: isProd ? 'production' : 'development',
-    entry: entryPoints,
+    entry,
     output: {
       path: path.resolve(__dirname, `${OUTPUT}`),
       filename: '[name]/index.js'
@@ -172,8 +163,19 @@ gulp.task('purescript-compile', ['init'], compilePurescript);
 // build purescript plugins
 gulp.task('purescript-build', ['init'], buildPurescript);
 
+// Build purescript plugins for debug (no bundling) 
+gulp.task('purescript-debug', ['init'], async function() {
+  await compilePurescript();
+  await Promise.all(
+    PLUGINS.filter(plugin => plugin.build.type === "purs")
+    .map(plugin =>
+      writeFile(`${PURS_PLUGINS_OUTPUT}/${plugin.name}/index.js`, `require('${PURS_OUTPUT}/${plugin.build.entry}').main();`)
+    )
+  );
+})
+
 //If webpack server is already running, kill it and start it again. (Useful when plugins are added, removed or modified at the plugin.json level)
-gulp.task('restart-server', ['purescript-compile'], () => {
+gulp.task('restart-server', ['purescript-debug'], () => {
   console.log("\n\t RESTARTING WEBPACK...\n")
   if(server != null) {
     server.close();
@@ -182,7 +184,7 @@ gulp.task('restart-server', ['purescript-compile'], () => {
 })
 
 // Start webpack server and watch all purescript directories and plugin.json files for changes. Rebuild on change
-gulp.task('debug', ['purescript-compile'], async () => {
+gulp.task('debug', ['purescript-debug'], async () => {
   console.log("\n\n\t NOTE: If you find that webpack-dev-server is not rebuilding on file changes, try increasing your system's max file watch count\n\n")
   server = webpackServe();
 
@@ -194,7 +196,7 @@ gulp.task('debug', ['purescript-compile'], async () => {
     if(pursDirs.indexOf(glob) == -1) pursDirs.push(glob); // Add without duplicates
   });
 
-  gulp.watch(pursDirs, ['purescript-compile']) //Recompile purescript only on purescript related changes. (Leave other JS files to webpack)
+  gulp.watch(pursDirs, ['purescript-debug']) //Recompile purescript only on purescript related changes. (Leave other JS files to webpack)
   gulp.watch([`${PLUGINS_SOURCE}/*/plugin.json`], ['restart-server']) //If any plugin's plugin.json is modified, re-init and rebuild is required
 })
 
