@@ -39,7 +39,7 @@ const initPlugins = async function() {
     plugins: PLUGINS
   }
 
-  await writeFile(`${OUTPUT}/meta.json`, JSON.stringify(meta, null, 2));
+  await writeFile(`${OUTPUT}/plugins.json`, JSON.stringify(meta, null, 2));
 }
 
 // Build the final bundled js files for each pluign

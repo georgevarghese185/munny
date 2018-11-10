@@ -40,7 +40,7 @@ getPluginsByType type' = do
 
 getPlugins :: ExceptT Error Aff (Array PluginMeta)
 getPlugins = do
-  response <- lift $ get (ResponseFormat.string) $ "meta.json"
+  response <- lift $ get (ResponseFormat.string) $ "plugins.json"
   jsonString <- case response.body of
     Right jsonString -> pure jsonString
     Left err -> throwError $ error $ "Failed to fetch plugin meta: " <> printResponseFormatError err
