@@ -13,8 +13,8 @@ const spawn = require('child_process').spawn;
 
 //======================== Constants and plugin info ============================
 
-
-const PLUGINS_SOURCE = "src/plugins";
+const SOURCE = "src"
+const PLUGINS_SOURCE = `${SOURCE}/plugins`;
 const OUTPUT = "dist";
 const PURS_OUTPUT = 'output'
 const PURS_PLUGINS_OUTPUT = 'output/_bundled';
@@ -53,7 +53,7 @@ const webpackBuild = function(prod) {
     }
   });
 
-  return gulp.src(['src/**/*.js', 'src/**/*.vue', `${PURS_PLUGINS_OUTPUT}/*/*.js`])
+  return gulp.src([`${SOURCE}/**/*.js`, `${SOURCE}/**/*.vue`, `${PURS_PLUGINS_OUTPUT}/*/*.js`])
     .pipe(webpackCompiler(webpackStream, entryPoints, prod))
     .on('error', function(err) {
       console.log(err);
@@ -63,7 +63,7 @@ const webpackBuild = function(prod) {
 }
 
 // Start dev server to build plugins serve output folder
-const webpackServer = function() {
+const webpackServe = function() {
   let entryPoints = {}
   PLUGINS.map(plugin => {
     if(plugin.build.type === "js") {
@@ -75,14 +75,15 @@ const webpackServer = function() {
 
   let compiler = webpackCompiler(webpack, entryPoints, false)
 
-  return new WebpackDevServer(compiler, {
-      contentBase: path.join(__dirname, `${OUTPUT}`)
-    })
-    .listen(8080, "localhost", function(err) {
+  let server = new WebpackDevServer(compiler, {
+    contentBase: path.join(__dirname, `${OUTPUT}`)
+  });
+  server.listen(8080, "localhost", function(err) {
   		if(err) {
         console.error(err);
       }
 	});
+  return server;
 }
 
 // Returns a compiler object using the provided webpack function
@@ -159,6 +160,8 @@ const bundlePurescript = async function() {
 
 //================================= Gulp Tasks ================================
 
+//If webpack server is running, this will reference it (used for killing/restarting)
+var server = null;
 
 // initalize `PLUGINS` with all plugins meta data
 gulp.task('init', initPlugins);
@@ -169,38 +172,37 @@ gulp.task('purescript-compile', ['init'], compilePurescript);
 // build purescript plugins
 gulp.task('purescript-build', ['init'], buildPurescript);
 
-// build plugin js bundles without optimizations
-gulp.task('webpack-build-dev', ['purescript-build'], () => webpackBuild(false));
+//If webpack server is already running, kill it and start it again. (Useful when plugins are added, removed or modified at the plugin.json level)
+gulp.task('restart-server', ['purescript-compile'], () => {
+  console.log("\n\t RESTARTING WEBPACK...\n")
+  if(server != null) {
+    server.close();
+  }
+  server = webpackServe();
+})
 
-// build plugin js bundles with optimizations
-gulp.task('webpack-build', ['purescript-build'], () => webpackBuild(true));
-
-// serve plugin js bundles
-gulp.task('webpack-serve', ['purescript-compile'], () => {
+// Start webpack server and watch all purescript directories and plugin.json files for changes. Rebuild on change
+gulp.task('debug', ['purescript-compile'], async () => {
   console.log("\n\n\t NOTE: If you find that webpack-dev-server is not rebuilding on file changes, try increasing your system's max file watch count\n\n")
-  webpackServer()
-});
+  server = webpackServe();
 
-// watch all purescript directories for changes. Rebuild purescript on change
-gulp.task('watch', ['webpack-serve'], async () => {
-  var watchDirs = [];
-  let pursFiles = await getFiles('src/**/*.purs');
+  var pursDirs = []; //Directories containing purescript files
+  let pursFiles = await getFiles(`${SOURCE}/**/*.purs`);
   pursFiles.map(file => {
     let dir = file.substring(0, file.lastIndexOf('/'));
     let glob = `${dir}/*`;
-    if(watchDirs.indexOf(glob) == -1) watchDirs.push(glob);
+    if(pursDirs.indexOf(glob) == -1) pursDirs.push(glob); // Add without duplicates
   });
-  return gulp.watch(watchDirs, ['purescript-compile'])
+
+  gulp.watch(pursDirs, ['purescript-compile']) //Recompile purescript only on purescript related changes. (Leave other JS files to webpack)
+  gulp.watch([`${PLUGINS_SOURCE}/*/plugin.json`], ['restart-server']) //If any plugin's plugin.json is modified, re-init and rebuild is required
 })
 
-// Build and run debug server
-gulp.task('debug', ['watch'])
-
 // Build all plugins without optimizations (debug build without needing a server)
-gulp.task('build-dev', ['webpack-build-dev'])
+gulp.task('build-dev', ['purescript-build'], () => webpackBuild(false))
 
 // Build all plugins for production
-gulp.task('build-prod', ['webpack-build'])
+gulp.task('build-prod', ['purescript-build'], () => webpackBuild(true))
 
 
 
