@@ -16,7 +16,7 @@ const spawn = require('child_process').spawn;
 
 const PLUGINS_SOURCE = "src/plugins";
 const OUTPUT = "dist";
-const PULP_OUTPUT = 'output'
+const PURS_OUTPUT = 'output'
 const PURS_PLUGINS_OUTPUT = 'output/_bundled';
 
 //Meta data of all available plugins. Initialize using `initPlugins()`
@@ -44,8 +44,17 @@ const initPlugins = async function() {
 
 // Build the final bundled js files for each pluign
 const webpackBuild = function(prod) {
+  let entryPoints = {}
+  PLUGINS.map(plugin => {
+    if(plugin.build.type === "js") {
+      entryPoints[plugin.name] = `${__dirname}/${PLUGINS_SOURCE}/${plugin.name}/${plugin.build.entry}`
+    } else {
+      entryPoints[plugin.name] = `${__dirname}/${PURS_PLUGINS_OUTPUT}/${plugin.name}/index.js`
+    }
+  });
+
   return gulp.src(['src/**/*.js', 'src/**/*.vue', `${PURS_PLUGINS_OUTPUT}/*/*.js`])
-    .pipe(webpackCompiler(webpackStream, prod))
+    .pipe(webpackCompiler(webpackStream, entryPoints, prod))
     .on('error', function(err) {
       console.log(err);
       this.emit('end');
@@ -55,16 +64,16 @@ const webpackBuild = function(prod) {
 
 // Start dev server to build plugins serve output folder
 const webpackServer = function() {
-  let entry = {}
+  let entryPoints = {}
   PLUGINS.map(plugin => {
     if(plugin.build.type === "js") {
-      entry[plugin.name] = `${__dirname}/${PLUGINS_SOURCE}/${plugin.name}/${plugin.build.entry}`
+      entryPoints[plugin.name] = `${__dirname}/${PLUGINS_SOURCE}/${plugin.name}/${plugin.build.entry}`
     } else {
-      entry[plugin.name] = `${__dirname}/${PURS_PLUGINS_OUTPUT}/${plugin.name}/index.js`
+      entryPoints[plugin.name] = `${__dirname}/${PURS_OUTPUT}/${plugin.build.entry}/index.js`
     }
   });
 
-  let compiler = webpackCompiler(webpack, false)
+  let compiler = webpackCompiler(webpack, entryPoints, false)
 
   return new WebpackDevServer(compiler, {
       contentBase: path.join(__dirname, `${OUTPUT}`)
@@ -77,19 +86,10 @@ const webpackServer = function() {
 }
 
 // Returns a compiler object using the provided webpack function
-const webpackCompiler = function(webpack, prod) {
-  let entry = {}
-  PLUGINS.map(plugin => {
-    if(plugin.build.type === "js") {
-      entry[plugin.name] = `${__dirname}/${PLUGINS_SOURCE}/${plugin.name}/${plugin.build.entry}`
-    } else {
-      entry[plugin.name] = `${__dirname}/${PURS_PLUGINS_OUTPUT}/${plugin.name}/index.js`
-    }
-  });
-
+const webpackCompiler = function(webpack, entryPoints, isProd) {
   let config = {
-    mode: prod ? 'production' : 'development',
-    entry,
+    mode: isProd ? 'production' : 'development',
+    entry: entryPoints,
     output: {
       path: path.resolve(__dirname, `${OUTPUT}`),
       filename: '[name]/index.js'
@@ -137,7 +137,7 @@ const buildPurescript = async function() {
 
 // Compile all purescript modules
 const compilePurescript = async function() {
-  await spawnAndWait('node_modules/.bin/pulp', ['build', '--build-path', `${PULP_OUTPUT}`]);
+  await spawnAndWait('node_modules/.bin/pulp', ['build', '--build-path', `${PURS_OUTPUT}`]);
 }
 
 // Bundle all purescript plugins
@@ -147,7 +147,7 @@ const bundlePurescript = async function() {
       .filter(plugin => plugin.build.type === "purs")
       .map(async plugin => {
         await spawnAndWait('node_modules/.bin/purs', ['bundle',
-          `${PULP_OUTPUT}/**/*.js`,
+          `${PURS_OUTPUT}/**/*.js`,
           `--module`, `${plugin.build.entry}`,
           '--main', plugin.build.entry,
           `--output`, `${PURS_PLUGINS_OUTPUT}/${plugin.name}/index.js`]);
@@ -163,6 +163,9 @@ const bundlePurescript = async function() {
 // initalize `PLUGINS` with all plugins meta data
 gulp.task('init', initPlugins);
 
+// Compile purescript modules without bundling plugins
+gulp.task('purescript-compile', ['init'], compilePurescript);
+
 // build purescript plugins
 gulp.task('purescript-build', ['init'], buildPurescript);
 
@@ -173,7 +176,10 @@ gulp.task('webpack-build-dev', ['purescript-build'], () => webpackBuild(false));
 gulp.task('webpack-build', ['purescript-build'], () => webpackBuild(true));
 
 // serve plugin js bundles
-gulp.task('webpack-serve', ['purescript-build'], () => webpackServer());
+gulp.task('webpack-serve', ['purescript-compile'], () => {
+  console.log("\n\n\t NOTE: If you find that webpack-dev-server is not rebuilding on file changes, try increasing your system's max file watch count\n\n")
+  webpackServer()
+});
 
 // watch all purescript directories for changes. Rebuild purescript on change
 gulp.task('watch', ['webpack-serve'], async () => {
@@ -184,7 +190,7 @@ gulp.task('watch', ['webpack-serve'], async () => {
     let glob = `${dir}/*`;
     if(watchDirs.indexOf(glob) == -1) watchDirs.push(glob);
   });
-  return gulp.watch(watchDirs, ['purescript-build'])
+  return gulp.watch(watchDirs, ['purescript-compile'])
 })
 
 // Build and run debug server
