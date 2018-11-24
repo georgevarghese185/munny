@@ -8,7 +8,7 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const fs = require('fs')
 const path = require('path');
 const spawn = require('child_process').spawn;
-
+const mkdirp = require('mkdirp')
 
 
 //======================== Constants and plugin info ============================
@@ -227,11 +227,18 @@ const readFile = async function(filePath) {
 //Append to a file using a Promise (for async/await)
 const writeFile = async function(filePath, data) {
   return new Promise(function(resolve, reject) {
-    fs.writeFile(filePath, data, (err, contents) => {
+    var dir = filePath.substring(0, filePath.lastIndexOf('/') + 1);
+    mkdirp(dir, function(err) {
       if(err) {
         reject(err);
       } else {
-        resolve();
+        fs.writeFile(filePath, data, (err, contents) => {
+          if(err) {
+            reject(err);
+          } else {
+            resolve();
+          }
+        })
       }
     })
   });
