@@ -1,7 +1,9 @@
 <template>
 
   <div class="nav-bar">
-    <div class="nav-button">
+    <Overlay zIndex="50" :visible="navDrawerOpen" @click.native="navDrawerOpen = !navDrawerOpen"/>
+    <NavDrawer :open="navDrawerOpen" zIndex="51"/>
+    <div class="nav-button" @click="navDrawerOpen = !navDrawerOpen">
       <img class="nav-bar-icon" :src="`${app.pluginDir}/assets/nav.png`"/>
     </div>
     <p class="title"> {{title}} </p>
@@ -13,9 +15,20 @@
 
 
 <script>
+  import Overlay from '../Overlay.vue'
+  import NavDrawer from './NavDrawer.vue'
 
   export default {
-    props: ["app", "title"]
+    data: function() {
+      return {
+        navDrawerOpen: false
+      }
+    },
+    props: ["app", "title"],
+    components: {
+      Overlay,
+      NavDrawer
+    }
   }
 
 </script>
@@ -47,6 +60,7 @@
     color: #f5f5f5;
     font-size: 22px;
     text-align: center;
+    pointer-events: none;
   }
 
   .nav-button {

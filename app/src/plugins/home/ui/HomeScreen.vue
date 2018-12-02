@@ -10,7 +10,7 @@
 
 
 <script>
-  import NavBar from './widgets/NavBar.vue'
+  import NavBar from './widgets/nav/NavBar.vue'
 
   export default {
     data: function(){
