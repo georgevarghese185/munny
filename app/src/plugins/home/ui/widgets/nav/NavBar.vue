@@ -45,7 +45,7 @@
   .nav-bar {
     position: relative;
     background-color: #333333;
-    border-bottom: #cecece solid 2px;
+    border-bottom: #cecece88 solid 1px;
   }
 
   .title {
@@ -55,8 +55,8 @@
     margin: 0;
     display: inline-block;
     width: 100%;
-    height: 48px;
-    line-height: 48px;
+    height: 52px;
+    line-height: 52px;
     color: #f5f5f5;
     font-size: 22px;
     text-align: center;
@@ -65,7 +65,7 @@
 
   .nav-button {
     width: 56px;
-    height: 48px;
+    height: 52px;
   }
 
   .nav-bar-icon {
@@ -73,7 +73,7 @@
     display: inline-block;
     width: 35px;
     height: 28px;
-    margin: 10px 10px;
+    margin: 12px 12px;
   }
 
 </style>
