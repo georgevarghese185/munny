@@ -15,26 +15,7 @@
   import Accounts from './widgets/accounts/Accounts.vue'
 
   export default {
-    data: function(){
-      return {
-        app: {
-          name: "Munny",
-          pluginDir: "home"
-        },
-        accounts: [
-          {
-            name: "ICICI",
-            logo: "bank_logos/icici.png",
-            lastUpdated: "4 hours ago"
-          },
-          {
-            name: "HDFC",
-            logo: "bank_logos/hdfc.png",
-            lastUpdated: "4 hours ago"
-          }
-        ]
-      }
-    },
+    props: ["app", "accounts"],
     components: {
       NavBar,
       Accounts
