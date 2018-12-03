@@ -3,11 +3,7 @@
 	<div class="accounts-card">
     <p class="title light-text"> Accounts </p>
     <p v-if="!accounts.length" class="no-accounts"> No accounts added </p>
-    <div v-for="account in accounts" class="account">
-      <img class="account-logo" :src="`${app.pluginDir}/assets/${account.logo}`"/>
-      <p class="account-name"> {{account.name}} </p>
-      <p class="last-updated light-text"> {{account.lastUpdated}} </p>
-    </div>
+    <Account :app="app" v-for="account in accounts" :account="account"/>
     <div class="add-account">
       <img class="add-icon" :src="`${app.pluginDir}/assets/add.png`"/>
       <p class="add-label light-text"> Add Account </p>
@@ -20,9 +16,13 @@
 
 
 <script>
+	import Account from './Account.vue'
 
 	export default {
-    props: ["app", "accounts"]
+    props: ["app", "accounts"],
+		components: {
+			Account
+		}
   }
 
 </script>
@@ -47,32 +47,6 @@
     margin: 0;
     font-size: 14px;
     margin-bottom: 18px;
-  }
-
-  .account {
-    display: flex;
-    align-items: center;
-    margin-bottom: 18px;
-  }
-
-  .account-logo {
-    width: 26px;
-    height: 26px;
-    flex-grow: 0;
-    margin-right: 16px;
-  }
-
-  .account-name {
-    color: #444444;
-    font-size: 16px;
-    flex-grow: 0;
-  }
-
-  .last-updated {
-    font-size: 12px;
-    text-align: right;
-    padding-bottom: 4px;
-    flex-grow: 1;
   }
 
   .no-accounts {
