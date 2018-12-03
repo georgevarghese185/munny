@@ -3,7 +3,7 @@
 	<div class="accounts-card">
     <p class="title light-text"> Accounts </p>
     <p v-if="!accounts.length" class="no-accounts"> No accounts added </p>
-    <Account :app="app" v-for="account in accounts" :account="account"/>
+    <Account :app="app" v-for="account in accounts" :key="account.name" :account="account"/>
     <div class="add-account">
       <img class="add-icon" :src="`${app.pluginDir}/assets/add.png`"/>
       <p class="add-label light-text"> Add Account </p>
