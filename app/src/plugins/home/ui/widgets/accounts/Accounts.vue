@@ -4,7 +4,7 @@
     <p class="title light-text"> Accounts </p>
     <p v-if="!accounts.length" class="no-accounts"> No accounts added </p>
     <Account :app="app" v-for="account in accounts" :key="account.name" :account="account"/>
-    <div class="add-account">
+    <div class="add-account clickable">
       <img class="add-icon" :src="`${app.pluginDir}/assets/add.png`"/>
       <p class="add-label light-text"> Add Account </p>
     </div>
@@ -37,7 +37,7 @@
   }
 
 	.accounts-card {
-    padding: 32px 12px 18px 32px;
+    padding: 32px 12px 18px 24px;
     background-color: #ffffff;
     margin: 0;
     border-bottom: #cecece88 solid 1px;
@@ -57,10 +57,17 @@
   }
 
   .add-account {
+		height: 44px;
+		padding-left: 8px;
     display: flex;
     align-items: center;
-    margin-top: 38px;
+    margin-top: 24px;
+		background-color: #ffffff;
   }
+
+	.add-account:active {
+		background-color: #c9c9c9;
+	}
 
   .add-icon {
     width: 24px;
@@ -76,6 +83,10 @@
 
   .light-text {
     color: #a1a1a1;
+  }
+
+	.clickable {
+    transition: background-color 0.1s;
   }
 
 </style>

@@ -1,6 +1,6 @@
 <template>
 
-  <div class="account">
+  <div class="account clickable">
     <img class="account-logo" :src="`${app.pluginDir}/assets/${account.logo}`"/>
     <p class="account-name"> {{account.name}} </p>
     <p class="last-updated light-text"> {{account.lastUpdated}} </p>
@@ -29,9 +29,15 @@
   }
 
   .account {
+    padding-left: 8px;
     display: flex;
     align-items: center;
     margin-bottom: 18px;
+    background-color: #ffffff;
+  }
+
+  .account:active {
+    background-color: #c9c9c9;
   }
 
   .account-logo {
@@ -56,6 +62,10 @@
 
   .light-text {
     color: #a1a1a1;
+  }
+
+  .clickable {
+    transition: background-color 0.1s;
   }
 
 </style>
