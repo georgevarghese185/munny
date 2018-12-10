@@ -1,9 +1,26 @@
 <template>
 
-  <div class="account clickable">
-    <img class="account-logo" :src="`${app.pluginDir}/assets/${account.logo}`"/>
-    <p class="account-name"> {{account.name}} </p>
-    <p class="last-updated light-text"> {{account.lastUpdated}} </p>
+  <div class="account-container clickable" @click="summaryOpen = !summaryOpen">
+    <div class="account">
+      <img class="account-logo" :src="`${app.pluginDir}/assets/${account.logo}`"/>
+      <p class="account-name"> {{account.name}} </p>
+      <p class="last-updated light-text"> Last updated: {{account.lastUpdated}} </p>
+    </div>
+    <transition name="roll">
+      <div v-if="account.summaryRows.length > 0 && summaryOpen" class="summary">
+        <div v-for="row in account.summaryRows" class="summary-row">
+          <div class="summary-column">
+            <p class="summary-item-label"> {{row.leftColumn.label}} </p>
+            <p class="summary-item-value"> {{row.leftColumn.value}} </p>
+          </div>
+          <div class="summary-column">
+            <p class="summary-item-label"> {{row.rightColumn.label}} </p>
+            <p class="summary-item-value"> {{row.rightColumn.value}} </p>
+          </div>
+        </div>
+      </div>
+    </transition>
+    <div class="bottom-gap"/>
   </div>
 
 </template>
@@ -14,6 +31,11 @@
 <script>
 
 	export default {
+    data: function() {
+      return {
+        summaryOpen: false
+      }
+    },
     props: ["app", "account"]
   }
 
@@ -32,11 +54,13 @@
     padding-left: 8px;
     display: flex;
     align-items: center;
-    margin-bottom: 18px;
+  }
+
+  .account-container {
     background-color: #ffffff;
   }
 
-  .account:active {
+  .account-container:active {
     background-color: #c9c9c9;
   }
 
@@ -60,12 +84,63 @@
     flex-grow: 1;
   }
 
+  .summary {
+    background-color: #fbfbfb;
+    border-left: 1px solid #efefef;
+    overflow: hidden;
+    max-height: 500px;
+  }
+
+  .roll-enter, .roll-leave-to {
+    max-height: 0;
+  }
+
+  .roll-enter-active, .roll-leave-active {
+    transition: max-height 0.5s;
+  }
+
+  .roll-enter-active {
+    transition-timing-function: ease-in;
+  }
+
+  .roll-leave-active {
+    transition-timing-function: ease-out;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .summary-column {
+    width: 100px;
+    margin: 8px 12px 16px 0;
+  }
+
+  .summary-item-label {
+    font-size: 11px;
+    margin: 4px 0;
+    text-align: right;
+    color: #959595;
+  }
+
+  .summary-item-value {
+    font-size: 11px;
+    margin: 4px 0;
+    text-align: right;
+    color: #5a5a5a;
+  }
+
+  .bottom-gap {
+    margin-bottom: 18px;
+  }
+
   .light-text {
     color: #a1a1a1;
   }
 
   .clickable {
-    transition: background-color 0.1s;
+    transition: background-color 0.1s ease;
   }
 
 </style>
