@@ -1,10 +1,11 @@
 <template>
 
 	<div class="accounts-card">
+		<ChooseService :visible="dialogVisible" :services="services"/>
     <p class="title light-text"> Accounts </p>
     <p v-if="!accounts.length" class="no-accounts"> No accounts added </p>
     <Account :app="app" v-for="account in accounts" :key="account.name" :account="account"/>
-    <div class="add-account clickable">
+    <div class="add-account clickable" @click="dialogVisible = !dialogVisible">
       <img class="add-icon" :src="`${app.pluginDir}/assets/add.png`"/>
       <p class="add-label light-text"> Add Account </p>
     </div>
@@ -17,11 +18,18 @@
 
 <script>
 	import Account from './Account.vue'
+	import ChooseService from '../dialogs/ChooseService.vue'
 
 	export default {
-    props: ["app", "accounts"],
+    props: ["app", "accounts", "services"],
+		data: function() {
+			return {
+				dialogVisible: false
+			}
+		},
 		components: {
-			Account
+			Account,
+			ChooseService
 		}
   }
 

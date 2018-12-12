@@ -2,7 +2,7 @@
 
   <div class="home-screen">
     <NavBar :app="app" :title="app.name"/>
-    <Accounts :app="app" :accounts="accounts"/>
+    <Accounts :app="app" :accounts="accounts" :services="services"/>
   </div>
 
 </template>
@@ -15,7 +15,7 @@
   import Accounts from './widgets/accounts/Accounts.vue'
 
   export default {
-    props: ["app", "accounts"],
+    props: ["app", "accounts", "services"],
     components: {
       NavBar,
       Accounts
