@@ -1,7 +1,8 @@
 <template>
 
 	<div class="accounts-card">
-		<ChooseService :visible="dialogVisible" :services="services"/>
+		<!-- <ChooseService :visible="dialogVisible" :services="services"/> -->
+		<InputsDialog :visible="dialogVisible" serviceName="HDFC Bank"/>
     <p class="title light-text"> Accounts </p>
     <p v-if="!accounts.length" class="no-accounts"> No accounts added </p>
     <Account :app="app" v-for="account in accounts" :key="account.name" :account="account"/>
@@ -19,6 +20,7 @@
 <script>
 	import Account from './Account.vue'
 	import ChooseService from '../dialogs/ChooseService.vue'
+	import InputsDialog from '../dialogs/InputsDialog.vue'
 
 	export default {
     props: ["app", "accounts", "services"],
@@ -29,7 +31,8 @@
 		},
 		components: {
 			Account,
-			ChooseService
+			ChooseService,
+			InputsDialog
 		}
   }
 
