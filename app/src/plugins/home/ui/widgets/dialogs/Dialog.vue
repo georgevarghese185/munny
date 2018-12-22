@@ -61,6 +61,7 @@
     font-size: 18px;
     text-align: center;
     margin: 14px 8px;
+		color: #676767
   }
 
 </style>
