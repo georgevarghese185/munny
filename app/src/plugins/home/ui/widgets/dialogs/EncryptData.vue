@@ -53,7 +53,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 24px;
+    margin-top: 18px;
     padding: 12px 12px;
   }
 
