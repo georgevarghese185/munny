@@ -3,7 +3,8 @@
 	<div class="accounts-card">
 		<!-- <ChooseService :visible="dialogVisible" :services="services"/> -->
 		<!-- <InputsDialog :visible="dialogVisible" serviceName="HDFC Bank"/> -->
-		<EncryptData :visible="dialogVisible" :encryptOptions="encryptOptions"/>
+		<!-- <EncryptData :visible="dialogVisible" :encryptOptions="encryptOptions"/> -->
+		<Password title="Enter a PIN" :visible="dialogVisible" :isNumberPin="true"/>
     <p class="title light-text"> Accounts </p>
     <p v-if="!accounts.length" class="no-accounts"> No accounts added </p>
     <Account :app="app" v-for="account in accounts" :key="account.name" :account="account"/>
@@ -23,6 +24,7 @@
 	import ChooseService from '../dialogs/ChooseService.vue'
 	import InputsDialog from '../dialogs/InputsDialog.vue'
 	import EncryptData from '../dialogs/EncryptData.vue'
+	import Password from '../dialogs/Password.vue'
 
 	export default {
     props: ["app", "accounts", "services", "encryptOptions"],
@@ -35,7 +37,8 @@
 			Account,
 			ChooseService,
 			InputsDialog,
-			EncryptData
+			EncryptData,
+			Password
 		}
   }
 

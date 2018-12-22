@@ -1,6 +1,6 @@
 <template>
 
-	<div :class="buttonStyle"> {{label}} </div>
+	<div :class="buttonStyle" @click="onClick"> {{label}} </div>
 
 </template>
 
@@ -19,7 +19,14 @@
           "disabled-button": this.disabled
         }
       }
-    }
+    },
+		methods: {
+			onClick: function() {
+				if(!disabled) {
+					this.$emit("click")
+				}
+			}
+		}
   }
 
 </script>
