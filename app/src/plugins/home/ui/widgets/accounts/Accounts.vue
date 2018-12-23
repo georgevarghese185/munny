@@ -1,7 +1,8 @@
 <template>
 
 	<div class="accounts-card">
-		<SelectorDialog label="Choose a Service..." :visible="dialogVisible" :options="services"/>
+		<!-- <SelectorDialog label="Choose a Service..." :visible="dialogVisible" :options="services"/> -->
+		<SelectorDialog label="Choose a Viewer..." :visible="dialogVisible" :options="viewers"/>
 		<!-- <InputsDialog :visible="dialogVisible" serviceName="HDFC Bank"/> -->
 		<!-- <EncryptData :visible="dialogVisible" :encryptOptions="encryptOptions"/> -->
 		<!-- <Password title="Enter a PIN" :visible="dialogVisible" :isNumberPin="true"/> -->
@@ -30,7 +31,7 @@
 	import SimpleDialog from '../dialogs/SimpleDialog.vue'
 
 	export default {
-    props: ["app", "accounts", "services", "encryptOptions"],
+    props: ["app", "accounts", "services", "viewers", "encryptOptions"],
 		data: function() {
 			return {
 				dialogVisible: false
