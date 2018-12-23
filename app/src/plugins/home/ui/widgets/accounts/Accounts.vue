@@ -1,7 +1,7 @@
 <template>
 
 	<div class="accounts-card">
-		<ChooseService :visible="dialogVisible" :services="services"/>
+		<SelectorDialog label="Choose a Service..." :visible="dialogVisible" :options="services"/>
 		<!-- <InputsDialog :visible="dialogVisible" serviceName="HDFC Bank"/> -->
 		<!-- <EncryptData :visible="dialogVisible" :encryptOptions="encryptOptions"/> -->
 		<!-- <Password title="Enter a PIN" :visible="dialogVisible" :isNumberPin="true"/> -->
@@ -23,7 +23,7 @@
 
 <script>
 	import Account from './Account.vue'
-	import ChooseService from '../dialogs/ChooseService.vue'
+	import SelectorDialog from '../dialogs/SelectorDialog.vue'
 	import InputsDialog from '../dialogs/InputsDialog.vue'
 	import EncryptData from '../dialogs/EncryptData.vue'
 	import Password from '../dialogs/Password.vue'
@@ -38,7 +38,7 @@
 		},
 		components: {
 			Account,
-			ChooseService,
+			SelectorDialog,
 			InputsDialog,
 			EncryptData,
 			Password,

@@ -2,8 +2,8 @@
 
 	<Dialog :visible="visible">
     <div class="dialog-contents">
-      <Selector label="Choose a Service..." :options="services" @select="onSelect"/>
-      <Button label="OK" :disabled="selectedService == null" @click="onOK"/>
+      <Selector :label="label" :options="options" @select="onSelect"/>
+      <Button label="OK" :disabled="selection == null" @click="onOK"/>
     </div>
   </Dialog>
 
@@ -18,10 +18,10 @@
   import Button from '../Button.vue'
 
 	export default {
-    props: ["visible", "services"],
+    props: ["visible", "label", "options"],
     data: function() {
       return {
-        selectedService: null
+        selection: null
       }
     },
     components: {
@@ -31,11 +31,11 @@
     },
     methods: {
       onSelect: function(selection) {
-        this.selectedService = selection;
+        this.selection = selection;
       },
       onOK: function() {
-        if(this.selectedService != null) {
-          this.$emit("done", this.selectedService)
+        if(this.selection != null) {
+          this.$emit("done", this.selection)
         }
       }
     }
