@@ -2,7 +2,7 @@
 
 	<Dialog :visible="visible">
     <div class="dialog-contents">
-      <Selector :options="services" @select="onSelect"/>
+      <Selector label="Choose a Service..." :options="services" @select="onSelect"/>
       <Button label="OK" :disabled="selectedService == null" @click="onOK"/>
     </div>
   </Dialog>

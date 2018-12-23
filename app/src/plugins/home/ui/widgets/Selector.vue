@@ -1,7 +1,7 @@
 <template>
 
   <select class="default-style" v-model="selected" @change="onChange">
-    <option disabled value="">Choose a Service...</option>
+    <option disabled value="">{{label}}</option>
     <option v-for="option in options"> {{option}} </option>
   </select>
 
@@ -13,7 +13,7 @@
 <script>
 
 	export default {
-    props: ["options"],
+    props: ["options", "label"],
     data: function() {
       return {
         selected: ''
