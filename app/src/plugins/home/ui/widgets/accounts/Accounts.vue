@@ -4,7 +4,9 @@
 		<!-- <ChooseService :visible="dialogVisible" :services="services"/> -->
 		<!-- <InputsDialog :visible="dialogVisible" serviceName="HDFC Bank"/> -->
 		<!-- <EncryptData :visible="dialogVisible" :encryptOptions="encryptOptions"/> -->
-		<Password title="Enter a PIN" :visible="dialogVisible" :isNumberPin="true"/>
+		<!-- <Password title="Enter a PIN" :visible="dialogVisible" :isNumberPin="true"/> -->
+		<!-- <SimpleDialog :visible="dialogVisible" message="Please authenticate the next screen"/> -->
+		<SimpleDialog :visible="dialogVisible" message="Account added"/>
     <p class="title light-text"> Accounts </p>
     <p v-if="!accounts.length" class="no-accounts"> No accounts added </p>
     <Account :app="app" v-for="account in accounts" :key="account.name" :account="account"/>
@@ -25,6 +27,7 @@
 	import InputsDialog from '../dialogs/InputsDialog.vue'
 	import EncryptData from '../dialogs/EncryptData.vue'
 	import Password from '../dialogs/Password.vue'
+	import SimpleDialog from '../dialogs/SimpleDialog.vue'
 
 	export default {
     props: ["app", "accounts", "services", "encryptOptions"],
@@ -38,7 +41,8 @@
 			ChooseService,
 			InputsDialog,
 			EncryptData,
-			Password
+			Password,
+			SimpleDialog
 		}
   }
 
