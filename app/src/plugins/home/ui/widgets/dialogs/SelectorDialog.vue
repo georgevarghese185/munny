@@ -1,6 +1,9 @@
 <template>
 
 	<Dialog :visible="visible">
+		<template slot="title">
+			{{title}}
+		</template>
     <div class="dialog-contents">
       <Selector :label="label" :options="options" @select="onSelect"/>
       <Button label="OK" :disabled="selection == null" @click="onOK"/>
@@ -18,7 +21,7 @@
   import Button from '../Button.vue'
 
 	export default {
-    props: ["visible", "label", "options"],
+    props: ["visible", "title", "label", "options"],
     data: function() {
       return {
         selection: null

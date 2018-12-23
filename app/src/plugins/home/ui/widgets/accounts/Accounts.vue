@@ -2,7 +2,7 @@
 
 	<div class="accounts-card">
 		<!-- <SelectorDialog label="Choose a Service..." :visible="dialogVisible" :options="services"/> -->
-		<SelectorDialog label="Choose a Viewer..." :visible="dialogVisible" :options="viewers"/>
+		<SelectorDialog title="Choose a plugin for viewing account details" label="Choose a Viewer..." :visible="dialogVisible" :options="viewers"/>
 		<!-- <InputsDialog :visible="dialogVisible" serviceName="HDFC Bank"/> -->
 		<!-- <EncryptData :visible="dialogVisible" :encryptOptions="encryptOptions"/> -->
 		<!-- <Password title="Enter a PIN" :visible="dialogVisible" :isNumberPin="true"/> -->
