@@ -85,8 +85,8 @@
     position: absolute;
     display: inline-block;
     width: 35px;
-    height: 28px;
-    margin: 12px 12px;
+    height: 26px;
+    margin: 14px 12px;
   }
 
   .clickable {
