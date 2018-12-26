@@ -5,6 +5,16 @@
       Syncing your accounts
     </template>
     <div class="dialog-contents">
+			<InputsDialog :visible="inputsDialogVisible" zIndex="45"/>
+			<Dialog :visible="cancelDialogVisible" zIndex="45">
+				<template slot="title">
+					Are you sure you want to cancel account sync?
+				</template>
+				<div class="cancel-dialog-contents">
+					<Button class="cancel-dialog-button" label="No" @click="cancelDialogVisible = false"/>
+					<Button class="cancel-dialog-button" label="Yes" @click="$emit('cancel')" />
+				</div>
+			</Dialog>
       <div class="account" v-for="account in accounts" :key="account.name">
         <div class="account-left-side">
           <div class="account-logo-name">
@@ -23,7 +33,7 @@
         </div>
       </div>
 			<Button v-if="syncComplete" label="OK" @click="$emit('done')" />
-      <Button v-else label="Cancel" @click="$emit('cancel')"/>
+      <Button v-else label="Cancel" @click="cancelDialogVisible = true"/>
     </div>
   </Dialog>
 
@@ -34,6 +44,7 @@
 
 <script>
   import Dialog from './Dialog.vue'
+	import InputsDialog from './InputsDialog.vue'
   import Button from '../Button.vue'
   import DotLoader from '../DotLoader.vue'
 
@@ -44,7 +55,9 @@
 				SUCCESS: "success",
 				FAILED: "failed",
 				INPUT_REQUIRED: "input_required",
-				SYNCING: "syncing"
+				SYNCING: "syncing",
+				inputsDialogVisible: false,
+				cancelDialogVisible: false
 			}
 		},
     computed: {
@@ -58,7 +71,7 @@
         return true;
       }
     },
-    components: { Dialog, Button, DotLoader }
+    components: { Dialog, Button, DotLoader, InputsDialog }
   }
 
 </script>
@@ -129,6 +142,19 @@
 	.sync-status-icon {
 		width: 22px;
 		height: 22px;
+	}
+
+	.cancel-dialog-contents {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.cancel-dialog-button {
+		width: 123px;
+		height: 40px;
+		margin: 27px 6;
 	}
 
 </style>
