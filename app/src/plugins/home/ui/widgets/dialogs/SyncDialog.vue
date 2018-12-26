@@ -11,14 +11,19 @@
             <img class="account-logo" :src="`${app.pluginDir}/assets/${account.logo}`"/>
             <p class="account-name"> {{account.name}} </p>
           </div>
-          <p class="account-sync-status"> {{account.syncStatus}} </p>
+          <p :class="{'account-sync-status':true, 'input-status':account.sync.status === INPUT_REQUIRED}">
+						{{account.sync.message}}
+					</p>
         </div>
         <div class="loader">
-          <DotLoader/>
+						<img class="sync-status-icon" v-if="account.sync.status === SUCCESS" :src="`${app.pluginDir}/assets/tick.png`"/>
+						<img class="sync-status-icon" v-else-if="account.sync.status === FAILED" :src="`${app.pluginDir}/assets/cross.png`"/>
+						<img class="sync-status-icon" v-else-if="account.sync.status === INPUT_REQUIRED" :src="`${app.pluginDir}/assets/exclamation.png`"/>
+					<DotLoader v-else/>
         </div>
       </div>
-      <Button v-if="!syncComplete" label="Cancel" @click="this.$emit('cancel')"/>
-      <Button v-if="syncComplete" label="OK" @click="this.$emit('done')" />
+			<Button v-if="syncComplete" label="OK" @click="$emit('done')" />
+      <Button v-else label="Cancel" @click="$emit('cancel')"/>
     </div>
   </Dialog>
 
@@ -34,10 +39,19 @@
 
 	export default {
     props: ["app", "visible", "accounts"],
+		data: function() {
+			return {
+				SUCCESS: "success",
+				FAILED: "failed",
+				INPUT_REQUIRED: "input_required",
+				SYNCING: "syncing"
+			}
+		},
     computed: {
       syncComplete: function() {
         for(let i = 0; i < this.accounts.length; i++) {
-          if(!this.accounts[i].syncComplete) {
+					let status = this.accounts[i].sync.status;
+          if(status !== this.SUCCESS && status !== this.FAILED) {
             return false;
           }
         }
@@ -101,11 +115,20 @@
     margin: 8px 0 0 28px;
   }
 
+	.input-status {
+		color: #e8a625;
+	}
+
   .loader {
     width: 32px;
     flex-grow: 0;
     display: flex;
     align-items: center;
   }
+
+	.sync-status-icon {
+		width: 22px;
+		height: 22px;
+	}
 
 </style>
