@@ -1,14 +1,6 @@
 <template>
 
 	<div class="accounts-card">
-		<!-- <SelectorDialog label="Choose a Service..." :visible="dialogVisible" :options="services"/> -->
-		<!-- <SelectorDialog title="Choose a plugin for viewing account details" label="Choose a Viewer..." :visible="dialogVisible" :options="viewers"/> -->
-		<!-- <InputsDialog :visible="dialogVisible" serviceName="HDFC Bank"/> -->
-		<!-- <EncryptDataDialog :visible="dialogVisible" :encryptOptions="encryptOptions"/> -->
-		<!-- <PasswordDialog title="Enter a PIN" :visible="dialogVisible" :isNumberPin="true"/> -->
-		<!-- <SimpleDialog :visible="dialogVisible" message="Please authenticate the next screen"/> -->
-		<!-- <SimpleDialog :visible="dialogVisible" message="Account added"/> -->
-		<SyncDialog :visible="dialogVisible" :app="app" :accounts="accounts"/>
     <p class="title light-text"> Accounts </p>
     <p v-if="!accounts.length" class="no-accounts"> No accounts added </p>
     <Account :app="app" v-for="account in accounts" :key="account.name" :account="account"/>
@@ -25,24 +17,10 @@
 
 <script>
 	import Account from './Account.vue'
-	import SelectorDialog from '../dialogs/SelectorDialog.vue'
-	import InputsDialog from '../dialogs/InputsDialog.vue'
-	import EncryptDataDialog from '../dialogs/EncryptDataDialog.vue'
-	import PasswordDialog from '../dialogs/PasswordDialog.vue'
-	import SimpleDialog from '../dialogs/SimpleDialog.vue'
-	import SyncDialog from '../dialogs/SyncDialog.vue'
 
 	export default {
-    props: ["app", "accounts", "services", "viewers", "encryptOptions"],
-		data: function() {
-			return {
-				dialogVisible: false
-			}
-		},
-		components: {
-			Account, SelectorDialog, InputsDialog, EncryptDataDialog, PasswordDialog,
-			SimpleDialog, SyncDialog
-		}
+    props: ["app", "accounts"],
+		components: { Account }
   }
 
 </script>
