@@ -42,7 +42,7 @@
     align-items: center;
     justify-content: center;
     height: 42px;
-    min-width: 150px;
+    width: 150px;
     border-radius: 30px;
     color: #ffffff;
     margin-top: 28px;
