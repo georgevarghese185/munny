@@ -4,8 +4,8 @@
 		<!-- <SelectorDialog label="Choose a Service..." :visible="dialogVisible" :options="services"/> -->
 		<!-- <SelectorDialog title="Choose a plugin for viewing account details" label="Choose a Viewer..." :visible="dialogVisible" :options="viewers"/> -->
 		<!-- <InputsDialog :visible="dialogVisible" serviceName="HDFC Bank"/> -->
-		<!-- <EncryptData :visible="dialogVisible" :encryptOptions="encryptOptions"/> -->
-		<!-- <Password title="Enter a PIN" :visible="dialogVisible" :isNumberPin="true"/> -->
+		<!-- <EncryptDataDialog :visible="dialogVisible" :encryptOptions="encryptOptions"/> -->
+		<!-- <PasswordDialog title="Enter a PIN" :visible="dialogVisible" :isNumberPin="true"/> -->
 		<!-- <SimpleDialog :visible="dialogVisible" message="Please authenticate the next screen"/> -->
 		<!-- <SimpleDialog :visible="dialogVisible" message="Account added"/> -->
 		<SyncDialog :visible="dialogVisible" :app="app" :accounts="accounts"/>
@@ -27,8 +27,8 @@
 	import Account from './Account.vue'
 	import SelectorDialog from '../dialogs/SelectorDialog.vue'
 	import InputsDialog from '../dialogs/InputsDialog.vue'
-	import EncryptData from '../dialogs/EncryptData.vue'
-	import Password from '../dialogs/Password.vue'
+	import EncryptDataDialog from '../dialogs/EncryptDataDialog.vue'
+	import PasswordDialog from '../dialogs/PasswordDialog.vue'
 	import SimpleDialog from '../dialogs/SimpleDialog.vue'
 	import SyncDialog from '../dialogs/SyncDialog.vue'
 
@@ -40,7 +40,7 @@
 			}
 		},
 		components: {
-			Account, SelectorDialog, InputsDialog, EncryptData, Password,
+			Account, SelectorDialog, InputsDialog, EncryptDataDialog, PasswordDialog,
 			SimpleDialog, SyncDialog
 		}
   }
