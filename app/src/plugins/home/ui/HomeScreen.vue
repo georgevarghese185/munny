@@ -12,8 +12,8 @@
 		<!-- <SyncDialog :visible="dialogVisible" :app="app" :accounts="accounts"/> -->
     <Accounts :app="app" :accounts="accounts"/>
     <div class="bottom-buttons-container">
-      <Button class="bottom-button" label="Sync" @click="$emit('sync')"/>
-      <Button class="bottom-button" label="View Details" @click="$emit('viewDetails')"/>
+      <Button class="bottom-button" :disabled="accounts.length == 0" label="Sync" @click="$emit('sync')"/>
+      <Button class="bottom-button" :disabled="accounts.length == 0" label="View Details" @click="$emit('viewDetails')"/>
     </div>
   </div>
 
