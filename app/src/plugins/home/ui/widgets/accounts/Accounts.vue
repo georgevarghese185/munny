@@ -33,7 +33,7 @@
 	import SyncDialog from '../dialogs/SyncDialog.vue'
 
 	export default {
-    props: ["app", "accounts", "services", "viewers", "encryptOptions", "syncingAccounts"],
+    props: ["app", "accounts", "services", "viewers", "encryptOptions"],
 		data: function() {
 			return {
 				dialogVisible: false
