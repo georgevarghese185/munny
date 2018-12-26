@@ -22,7 +22,7 @@
     },
 		methods: {
 			onClick: function() {
-				if(!disabled) {
+				if(!this.disabled) {
 					this.$emit("click")
 				}
 			}
