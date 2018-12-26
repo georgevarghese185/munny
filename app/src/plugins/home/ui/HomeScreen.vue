@@ -11,6 +11,10 @@
 		<!-- <SimpleDialog :visible="dialogVisible" message="Account added"/> -->
 		<!-- <SyncDialog :visible="dialogVisible" :app="app" :accounts="accounts"/> -->
     <Accounts :app="app" :accounts="accounts"/>
+    <div class="bottom-buttons-container">
+      <Button class="bottom-button" label="Sync" @click="$emit('sync')"/>
+      <Button class="bottom-button" label="View Details" @click="$emit('viewDetails')"/>
+    </div>
   </div>
 
 </template>
@@ -19,6 +23,7 @@
 
 
 <script>
+  import Button from './widgets/Button.vue'
   import NavBar from './widgets/nav/NavBar.vue'
   import Accounts from './widgets/accounts/Accounts.vue'
   import SelectorDialog from './widgets/dialogs/SelectorDialog.vue'
@@ -31,7 +36,7 @@
   export default {
     props: ["app", "accounts", "services", "encryptOptions", "viewers"],
     components: {
-      NavBar, Accounts, SelectorDialog, InputsDialog, EncryptDataDialog,
+      Button, NavBar, Accounts, SelectorDialog, InputsDialog, EncryptDataDialog,
 			PasswordDialog, SimpleDialog, SyncDialog
     }
   }
@@ -48,6 +53,20 @@
     width: 100%;
     height: 100%;
     background: #fbfbfb;
+  }
+
+  .bottom-buttons-container {
+    position: fixed;
+    bottom: 12px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .bottom-button {
+    margin: 0 8px;
   }
 
 </style>

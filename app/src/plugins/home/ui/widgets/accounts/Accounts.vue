@@ -37,7 +37,7 @@
 	.accounts-card {
     padding: 32px 12px 18px 24px;
     background-color: #ffffff;
-    margin: 0;
+    margin: 0 0 120px 0;
     border-bottom: #cecece88 solid 1px;
   }
 
