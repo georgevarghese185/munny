@@ -1,8 +1,8 @@
 <template>
 
 	<div>
-    <Overlay zIndex="40" :visible="visible"/>
-    <div v-if="visible" class="dialog-container">
+    <Overlay :zIndex="zIndex || 40" :visible="visible"/>
+    <div v-if="visible" class="dialog-container" :style="`z-index:${zIndex ? zIndex+1 : 41};`">
       <div class="dialog">
         <p class="title">
           <slot name="title"></slot>
@@ -21,7 +21,7 @@
   import Overlay from '../Overlay.vue'
 
 	export default {
-    props: ["visible"],
+    props: ["visible", "zIndex"],
     components: {
       Overlay
     }
@@ -47,7 +47,6 @@
     height: 100%;
     justify-content: center;
     align-items: center;
-    z-index: 41;
   }
 
   .dialog {
