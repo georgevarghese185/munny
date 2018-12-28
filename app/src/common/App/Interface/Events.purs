@@ -1,12 +1,15 @@
 module App.Interface.Events (
-    Event
+    Event(..)
   , setupEvents
+  , waitFor
   ) where
 
 import Prelude
 
+import Data.Either (Either(..))
 import Data.Foldable (traverse_)
 import Effect (Effect)
+import Effect.Aff (Aff, effectCanceler, makeAff)
 import Effect.Class.Console (log)
 import Effect.Uncurried (EffectFn1, EffectFn2, runEffectFn1, runEffectFn2)
 
@@ -28,3 +31,10 @@ setupEvents :: Effect Unit
 setupEvents = do
   runEffectFn1 setupEventsImpl $ show <$> events
   traverse_ (\event -> runEffectFn2 addEventListener event (log event)) (show <$> events)
+
+waitFor :: Event -> Aff Unit
+waitFor event = do
+  let listener cb = runEffectFn2 removeEventListener (show event) (listener cb) *> cb (Right unit)
+  makeAff \cb -> do
+    runEffectFn2 addEventListener (show event) (listener cb)
+    pure $ effectCanceler (pure unit)

@@ -42,7 +42,7 @@ start = do
     Nothing -> throwError $ error "No main plugin found"
     Just p -> pure p
   let input = if elem "ui" p.inputs
-        then unsafeToForeign {ui: "root"}
+        then unsafeToForeign {ui: "#root"}
         else encode (Nothing :: Maybe Foreign)
   void $ loadPlugin p.name input
   pure unit

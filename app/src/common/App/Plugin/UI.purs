@@ -1,58 +1,47 @@
 module App.Plugin.UI (
-    UiInput(..)
-  , class Event
-  , event
-  , Context
+    Ui
   , newUi
-  , updateScreen
+  , updateState
+  , onStateUpdate
+  , newEvent
   , wait
   ) where
 
 import Prelude
 
 import Data.Either (either)
-import Data.Generic.Rep (class Generic)
 import Data.Maybe (Maybe, maybe)
-import Data.Newtype (class Newtype)
 import Effect (Effect)
-import Effect.AVar (AVar, empty, put)
-import Effect.Aff (Aff, message)
-import Effect.Aff.AVar (take)
+import Effect.AVar (AVar, AVarCallback, empty, put, take, tryTake)
+import Effect.Aff (Aff)
+import Effect.Aff.AVar as A
 import Effect.Class (class MonadEffect, liftEffect)
-import Effect.Class.Console (error)
-import Foreign.Class (class Decode, class Encode)
-import Foreign.Generic (defaultOptions, genericDecode, genericEncode)
+import Effect.Class.Console (errorShow)
+
+data Ui state event = Ui (AVar state) (AVar event)
+
+replace :: forall a. a -> AVar a -> AVarCallback Unit -> Effect Unit
+replace a aVar callback = do
+  void $ tryTake aVar
+  void $ put a aVar callback
 
 
-
-newtype UiInput = UiInput {
-  rootId :: String
-}
-
-derive instance newtypeUiInput :: Newtype UiInput _
-derive instance genericUiInput :: Generic UiInput _
-instance encodeUiInput :: Encode UiInput where encode = genericEncode defaultOptions{unwrapSingleConstructors = true}
-instance decodeUiInput :: Decode UiInput where decode = genericDecode defaultOptions{unwrapSingleConstructors = true}
-
-
-class Event state event where
-  event :: state -> Maybe event
-
-newtype Context state = Context {
-  render :: state -> Effect Unit
-, state :: AVar state
-}
-
-newUi :: forall m state. MonadEffect m => (state -> Effect Unit) -> m ({context :: Context state, updateState :: state -> Effect Unit})
-newUi renderFn = liftEffect do
+newUi :: forall m state event. MonadEffect m => m (Ui state event)
+newUi = liftEffect do
   st <- empty
-  let updateState newState = void $ put newState st (either (message >>> error) pure)
-  pure $ {context: Context {render: renderFn, state: st}, updateState}
+  ev <- empty
+  pure $ Ui st ev
 
-updateScreen :: forall m state. MonadEffect m => state -> Context state -> m Unit
-updateScreen st (Context {render}) = liftEffect $ render st
+updateState :: forall m state event. MonadEffect m => Ui state event -> state -> m Unit
+updateState (Ui st _) newState = liftEffect $ replace newState st $ either errorShow pure
 
-wait :: forall state event. Event state event => Context state -> Aff event
-wait context@(Context {state: st}) = do
-  newState <- take st
-  maybe (wait context) pure $ event newState
+onStateUpdate :: forall m state event. MonadEffect m => Ui state event -> (state -> Effect Unit) -> m Unit
+onStateUpdate (Ui st _) fn = liftEffect $ void $ take st $ either errorShow fn
+
+newEvent :: forall m state event. MonadEffect m => Ui state event -> event -> m Unit
+newEvent (Ui _ ev) event = liftEffect $ replace event ev $ either errorShow pure
+
+wait :: forall a state event. Ui state event -> (event -> Maybe a) -> Aff a
+wait ui@(Ui _ ev) fn = do
+  event <- A.take ev
+  maybe (wait ui fn) pure $ fn event

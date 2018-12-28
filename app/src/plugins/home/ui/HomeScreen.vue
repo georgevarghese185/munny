@@ -1,7 +1,7 @@
 <template>
 
   <div class="home-screen">
-    <NavBar :app="app" :title="app.name"/>
+    <NavBar :app="state.app" :title="state.app.name"/>
     <!-- <SelectorDialog label="Choose a Service..." :visible="dialogVisible" :options="services"/> -->
 		<!-- <SelectorDialog title="Choose a plugin for viewing account details" label="Choose a Viewer..." :visible="dialogVisible" :options="viewers"/> -->
 		<!-- <InputsDialog :visible="dialogVisible" serviceName="HDFC Bank"/> -->
@@ -10,10 +10,10 @@
 		<!-- <SimpleDialog :visible="dialogVisible" message="Please authenticate the next screen"/> -->
 		<!-- <SimpleDialog :visible="dialogVisible" message="Account added"/> -->
 		<!-- <SyncDialog :visible="dialogVisible" :app="app" :accounts="accounts"/> -->
-    <Accounts :app="app" :accounts="accounts"/>
+    <Accounts :app="state.app" :accounts="state.accounts"/>
     <div class="bottom-buttons-container">
-      <Button class="bottom-button" :disabled="accounts.length == 0" label="Sync" @click="$emit('sync')"/>
-      <Button class="bottom-button" :disabled="accounts.length == 0" label="View Details" @click="$emit('viewDetails')"/>
+      <Button class="bottom-button" :disabled="state.accounts.length == 0" label="Sync" @click="$emit('sync')"/>
+      <Button class="bottom-button" :disabled="state.accounts.length == 0" label="View Details" @click="$emit('viewDetails')"/>
     </div>
   </div>
 
@@ -34,7 +34,7 @@
 	import SyncDialog from './widgets/dialogs/SyncDialog.vue'
 
   export default {
-    props: ["app", "accounts", "services", "encryptOptions", "viewers"],
+    props: ["state", "stateCommunicator"],
     components: {
       Button, NavBar, Accounts, SelectorDialog, InputsDialog, EncryptDataDialog,
 			PasswordDialog, SimpleDialog, SyncDialog

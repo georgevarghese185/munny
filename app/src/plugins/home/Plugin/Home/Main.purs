@@ -4,21 +4,18 @@ module Plugin.Home.Main (
 
 import Prelude
 
+import App.Interface.Events (Event(..), waitFor)
 import App.Plugin (pluginReady)
-import App.Plugin.UI (updateScreen, wait)
 import Control.Monad.Except (ExceptT, runExcept, runExceptT, throwError)
 import Data.Either (Either(..), either)
 import Effect (Effect)
 import Effect.Aff (Aff, Error, error)
 import Effect.Aff.Class (liftAff)
 import Effect.Class (liftEffect)
-import Effect.Class.Console (log)
-import Foreign (Foreign, unsafeToForeign)
+import Foreign (Foreign, readString, unsafeToForeign)
 import Foreign.Index (index)
-import Plugin.Home.UI (HomeEvent, HomeState(..), startHomeUi)
-
-pluginName :: String
-pluginName = "home"
+import Plugin.Home (pluginName)
+import Plugin.Home.UI.HomeScreen (startHomeScreen)
 
 main :: Effect Unit
 main = pluginReady pluginName $ \input -> do
@@ -26,12 +23,9 @@ main = pluginReady pluginName $ \input -> do
 
 start :: Foreign -> ExceptT Error Aff Foreign
 start input = do
-  rootId <- case runExcept $ index input "ui" of
+  rootId <- case runExcept $ index input "ui" >>= readString of
     Left _ -> throwError $ error "No ui input given"
     Right id -> pure id
-  context <- liftEffect $ startHomeUi
-  liftEffect $ updateScreen (HomeState {message: "YO", continueClicked: false}) context
-  liftEffect $ updateScreen (HomeState {message: "YAAASS", continueClicked: false}) context
-  (event :: HomeEvent) <- liftAff $ wait context
-  log "Continue clicked"
+  ui <- liftEffect $ startHomeScreen rootId
+  liftAff $ waitFor BackPressed
   pure input
