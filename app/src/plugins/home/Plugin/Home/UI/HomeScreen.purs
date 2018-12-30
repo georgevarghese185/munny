@@ -108,7 +108,10 @@ startHomeScreen rootId = do
   ui <- newUi
   let onEvent eventName args = decodeEvent eventName args >>= maybe (pure unit) (newEvent ui)
   updateStateFn <- runEffectFn2 startHomeScreenImpl rootId (mkEffectFn2 onEvent)
-  let stateUpdater state = runEffectFn1 updateStateFn (write state) *> onStateUpdate ui stateUpdater
+  let stateUpdater state = do
+        runEffectFn1 updateStateFn (write state)
+        onStateUpdate ui stateUpdater
+        pure true
   onStateUpdate ui stateUpdater
   updateState ui initialState
   pure ui

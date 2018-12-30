@@ -4,7 +4,6 @@ module Plugin.Home.Main (
 
 import Prelude
 
-import App.Interface.Events (Event(..), waitFor)
 import App.Plugin (pluginReady)
 import App.Plugin.UI (updateState, wait)
 import Control.Monad.Except (ExceptT, runExcept, runExceptT, throwError)
@@ -14,7 +13,7 @@ import Effect (Effect)
 import Effect.Aff (Aff, Error, error)
 import Effect.Aff.Class (liftAff)
 import Effect.Class (liftEffect)
-import Effect.Class.Console (log, logShow)
+import Effect.Class.Console (log)
 import Foreign (Foreign, readString, unsafeToForeign)
 import Foreign.Generic (encodeJSON)
 import Foreign.Index (index)
