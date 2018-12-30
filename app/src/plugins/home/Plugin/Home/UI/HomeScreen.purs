@@ -74,6 +74,25 @@ initialState = {
 , viewers: []
 }
 
+testState :: HomeScreenState
+testState = {
+  app: {
+    name: appName
+  , pluginDir: pluginDir
+  }
+, accounts: [
+    {
+      name: "ICICI"
+    , logo: "bank_logos/icici.png"
+    , lastUpdated: "4 centuries ago"
+    , summaryRows: []
+    }
+  ]
+, services: []
+, encryptOptions: []
+, viewers: []
+}
+
 
 decodeEvent :: String -> Array Foreign -> Effect (Maybe HomeScreenEvent)
 decodeEvent eventName args = case runExcept $ decode' eventName args of
@@ -89,6 +108,7 @@ startHomeScreen rootId = do
   ui <- newUi
   let onEvent eventName args = decodeEvent eventName args >>= maybe (pure unit) (newEvent ui)
   updateStateFn <- runEffectFn2 startHomeScreenImpl rootId (mkEffectFn2 onEvent)
-  onStateUpdate ui \state -> runEffectFn1 updateStateFn (write state)
+  let stateUpdater state = runEffectFn1 updateStateFn (write state) *> onStateUpdate ui stateUpdater
+  onStateUpdate ui stateUpdater
   updateState ui initialState
   pure ui
