@@ -2,7 +2,10 @@ module App.Plugin.UI (
     Ui
   , newUi
   , updateState
+  , getState
+  , modifyState
   , newEvent
+  , getLastEvent
   , onStateUpdate
   , onEvent
   , wait
@@ -35,12 +38,12 @@ replaceAff a ref = do
   _ <- A.tryTake ref
   A.put a ref
 
-watch :: forall a. AVar a -> AVar (Handlers a) -> Aff Unit
-watch ref handlersRef = do
-  a <- A.take ref
-  handlers <- A.read handlersRef
+updateAndNotify :: forall a m. MonadEffect m => a -> AVar a -> AVar (Handlers a) -> m Unit
+updateAndNotify a ref handlersRef = liftEffect $ runAff_ (either errorShow pure) do
+  replaceAff a ref
+  handlers <- A.take handlersRef
+  A.put mempty handlersRef
   traverse_ (\fn -> liftEffect $ fn a) handlers
-  watch ref handlersRef
 
 newUi :: forall m state event. MonadEffect m => m (Ui state event)
 newUi = liftEffect do
@@ -48,15 +51,24 @@ newUi = liftEffect do
   ev <- empty
   stateHandlers <- new mempty
   eventHandlers <- new mempty
-  runAff_ (either (errorShow) pure) $ watch st stateHandlers
-  runAff_ (either (errorShow) pure) $ watch ev eventHandlers
   pure $ Ui st ev stateHandlers eventHandlers
 
 updateState :: forall m state event. MonadEffect m => Ui state event -> state -> m Unit
-updateState (Ui st _ _ _) newState = liftEffect $ replace newState st $ either errorShow pure
+updateState (Ui st _ stHandlers _) newState = updateAndNotify newState st stHandlers
+
+getState :: forall state event. Ui state event -> Aff state
+getState (Ui st _ _ _) = A.read st
+
+modifyState :: forall state event. Ui state event -> (state -> state) -> Aff Unit
+modifyState ui fn = do
+  state <- getState ui
+  updateState ui $ fn state
 
 newEvent :: forall m state event. MonadEffect m => Ui state event -> event -> m Unit
-newEvent (Ui _ ev _ _) event = liftEffect $ replace event ev $ either errorShow pure
+newEvent (Ui _ ev _ evHandlers) event = updateAndNotify event ev evHandlers
+
+getLastEvent :: forall state event. Ui state event -> Aff event
+getLastEvent (Ui _ ev _ _) = A.read ev
 
 addHandler :: forall a m. MonadEffect m => AVar (Handlers a) -> (a -> Effect Boolean) -> m Unit
 addHandler handlersRef fn = liftEffect $ runAff_ (either (errorShow) pure) do

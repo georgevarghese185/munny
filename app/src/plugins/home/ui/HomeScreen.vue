@@ -2,18 +2,17 @@
 
   <div class="home-screen">
     <NavBar :app="app" :title="app.name"/>
-    <!-- <SelectorDialog label="Choose a Service..." :visible="dialogVisible" :options="services"/> -->
-		<!-- <SelectorDialog title="Choose a plugin for viewing account details" label="Choose a Viewer..." :visible="dialogVisible" :options="viewers"/> -->
-		<!-- <InputsDialog :visible="dialogVisible" serviceName="HDFC Bank"/> -->
-		<!-- <EncryptDataDialog :visible="dialogVisible" :encryptOptions="encryptOptions"/> -->
-		<!-- <PasswordDialog title="Enter a PIN" :visible="dialogVisible" :isNumberPin="true"/> -->
-		<!-- <SimpleDialog :visible="dialogVisible" message="Please authenticate the next screen"/> -->
-		<!-- <SimpleDialog :visible="dialogVisible" message="Account added"/> -->
-		<!-- <SyncDialog :visible="dialogVisible" :app="app" :accounts="accounts"/> -->
-    <Accounts :app="app" :accounts="accounts" @addAccount="onEvent('AddAccountClick')"/>
+		<SelectorDialog v-if="dialogs.selectorDialog.visible" :visible="dialogs.selectorDialog" :title="dialogs.selectorDialog.title"
+      :label="dialogs.selectorDialog.label" :options="dialogs.selectorDialog.options" @done="onSelectorDialogDone"/>
+		<InputsDialog :visible="dialogs.inputsDialog.visible" :serviceName="dialogs.inputsDialog.serviceName"/>
+		<EncryptDataDialog :visible="dialogs.encryptDialog.visible" :encryptOptions="dialogs.encryptDialog.options"/>
+		<PasswordDialog title="Enter a PIN" :visible="dialogs.passwordDialog.visible" :isNumberPin="dialogs.passwordDialog.isNumberPin"/>
+		<SimpleDialog :visible="dialogs.simpleDialog.visible" :message="dialogs.simpleDialog.message"/>
+		<SyncDialog :visible="dialogs.syncDialog.visible" :app="app" :accounts="dialogs.syncDialog.accounts"/>
+    <Accounts :app="app" :accounts="accounts" @addAccount="onAddAccount"/>
     <div class="bottom-buttons-container">
-      <Button class="bottom-button" :disabled="accounts.length == 0" label="Sync" @click="onEvent('SyncClick')"/>
-      <Button class="bottom-button" :disabled="accounts.length == 0" label="View Details" @click="onEvent('ViewDetailsClick')"/>
+      <Button class="bottom-button" :disabled="accounts.length == 0" label="Sync" @click="onSyncClick"/>
+      <Button class="bottom-button" :disabled="accounts.length == 0" label="View Details" @click="onViewDetailsClick"/>
     </div>
   </div>
 
@@ -37,13 +36,14 @@
   export default {
     props: ["initialState", "onEvent", "setStateListener"],
     data: function() {
-      let { app, accounts, services, encryptOptions, viewers } = this.initialState;
+      let { app, accounts, services, encryptOptions, viewers, dialogs } = this.initialState;
       return {
         app,
         accounts,
         services,
         encryptOptions,
-        viewers
+        viewers,
+        dialogs
       }
     },
     mounted: function() {
@@ -51,6 +51,20 @@
       this.setStateListener(function(newState) {
         updateVue(vm, newState);
       });
+    },
+    methods: {
+      onSelectorDialogDone: function(selection) {
+        this.onEvent('SelectorDialog', selection)
+      },
+      onAddAccount: function() {
+        this.onEvent('AddAccountClick');
+      },
+      onSyncClick: function() {
+        this.onEvent('SyncClick')
+      },
+      onViewDetailsClick: function() {
+        this.onEvent('ViewDetailsClick')
+      }
     },
     components: {
       Button, NavBar, Accounts, SelectorDialog, InputsDialog, EncryptDataDialog,

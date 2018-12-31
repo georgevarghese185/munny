@@ -2,6 +2,7 @@ module App.Interface.Events (
     Event(..)
   , setupEvents
   , waitFor
+  , on
   ) where
 
 import Prelude
@@ -33,8 +34,16 @@ setupEvents = do
   traverse_ (\event -> runEffectFn2 addEventListener event (log event)) (show <$> events)
 
 waitFor :: Event -> Aff Unit
-waitFor event = do
-  let listener cb = runEffectFn2 removeEventListener (show event) (listener cb) *> cb (Right unit)
-  makeAff \cb -> do
-    runEffectFn2 addEventListener (show event) (listener cb)
-    pure $ effectCanceler (pure unit)
+waitFor event = makeAff \cb -> do
+  let
+    removeListener fn = runEffectFn2 removeEventListener (show event) fn
+    listener = do
+      cb (Right unit)
+      removeListener listener
+  runEffectFn2 addEventListener (show event) listener
+  pure $ effectCanceler (removeListener listener)
+
+on :: forall a. Event -> Aff a -> Aff a
+on event aff = do
+  waitFor event
+  aff
