@@ -169,12 +169,12 @@ initialState = {
 }
 
 
-decodeEvent :: String -> Array Foreign -> Effect (Maybe HomeScreenEvent)
+decodeEvent :: forall a. Decode a => String -> Array Foreign -> Effect (Maybe a)
 decodeEvent eventName args = case runExcept $ decode' eventName args of
   Right event -> pure $ Just event
   Left e -> errorShow e *> pure Nothing
   where
-    decode' :: String -> Array Foreign -> F HomeScreenEvent
+    decode' :: String -> Array Foreign -> F a
     decode' e [a] = decode $ unsafeToForeign {tag: e, contents: a}
     decode' e as = decode $ unsafeToForeign {tag: e, contents: as}
 

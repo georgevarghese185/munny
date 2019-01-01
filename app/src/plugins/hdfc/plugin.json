@@ -1,0 +1,10 @@
+{
+  "name": "hdfc",
+  "type": ["account-service", "bank"],
+  "inputs": ["ui", "account-service-settings"],
+  "outputs": ["account-service-settings", "service-accounts"],
+  "build": {
+    "entry": "Plugin.HDFC.Main",
+    "type": "purs"
+  }
+}

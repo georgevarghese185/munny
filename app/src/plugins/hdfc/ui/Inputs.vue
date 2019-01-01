@@ -2,11 +2,11 @@
 
 	<div class="dialog-contents">
     <p class="sensitive light-text"> *Sensitive </p>
-    <input class="field" type="email" placeholder="Customer ID"/>
+    <input class="field" type="email" placeholder="Customer ID" :value="customerId"/>
     <p class="sensitive light-text"> *Sensitive </p>
-    <input class="field" type="password" placeholder="Password"/>
+    <input class="field" type="password" placeholder="Password" :value="password"/>
     <p class="sensitive-note light-text"> *Sensitive fields will be encrypted and stored on your device </p>
-    <Button label="OK"/>
+    <Button label="OK" @click="onOkClick"/>
   </div>
 
 </template>
@@ -18,6 +18,18 @@
   import Button from 'src/plugins/home/ui/widgets/Button.vue';
 
 	export default {
+		props: ["initialState", "onEvent"],
+		data: function() {
+			return {
+				customerId: this.initialState.customerId,
+				password: this.initialState.password
+			}
+		},
+		methods: {
+			onOkClick: function() {
+				this.onEvent("done", this.customerId, this.password)
+			}
+		},
     components: { Button }
   }
 
