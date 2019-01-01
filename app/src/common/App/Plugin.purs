@@ -1,5 +1,9 @@
 module App.Plugin (
-    initialize
+    Plugin(..)
+  , getPlugin
+  , getPluginsByType
+  , getPlugins
+  , initialize
   , loadPlugin
   , unloadPlugin
   , pluginReady
@@ -7,16 +11,26 @@ module App.Plugin (
 
 import Prelude
 
-import Control.Monad.Except (ExceptT, catchError, throwError)
+import Affjax (get, printResponseFormatError)
+import Affjax.ResponseFormat as ResponseFormat
+import Control.Monad.Except (ExceptT, catchError, runExcept, throwError)
 import Control.Monad.Maybe.Trans (MaybeT(..), lift, runMaybeT)
+import Data.Array (elem, filter)
 import Data.Either (Either(..), either)
+import Data.Foldable (find)
+import Data.Generic.Rep (class Generic)
 import Data.Maybe (Maybe, maybe)
+import Data.Newtype (class Newtype)
 import Effect (Effect)
 import Effect.Aff (Aff, Error, error, makeAff, nonCanceler, runAff_)
 import Effect.Class (liftEffect)
 import Effect.Exception (throw, throwException)
 import Effect.Uncurried (EffectFn1, EffectFn2, EffectFn3, mkEffectFn1, mkEffectFn2, mkEffectFn3, mkEffectFn4, runEffectFn1, runEffectFn2, runEffectFn3)
 import Foreign (Foreign, unsafeToForeign)
+import Foreign.Class (class Decode, class Encode, decode)
+import Foreign.Generic (defaultOptions, genericDecode, genericEncode)
+import Foreign.Index (index)
+import Foreign.JSON (parseJSON)
 import Web.DOM.Document (Document)
 import Web.DOM.Document (createElement, toNonElementParentNode, toParentNode) as Document
 import Web.DOM.Element (setId, toNode)
@@ -32,6 +46,37 @@ import Web.HTML.HTMLHeadElement as Head
 import Web.HTML.HTMLScriptElement as Script
 import Web.HTML.Window as Window
 
+newtype Plugin = Plugin {
+  name :: String
+, type :: Array String
+, inputs :: Array String
+, outputs :: Array String
+}
+
+derive instance newtypePlugin :: Newtype Plugin _
+derive instance genericPlugin :: Generic Plugin _
+instance encodePlugin :: Encode Plugin where encode = genericEncode defaultOptions {unwrapSingleConstructors = true}
+instance decodePlugin :: Decode Plugin where decode = genericDecode defaultOptions {unwrapSingleConstructors = true}
+
+
+getPlugin :: String -> ExceptT Error Aff (Maybe Plugin)
+getPlugin pluginName = do
+  find (\(Plugin m) -> m.name == pluginName) <$> getPlugins
+
+getPluginsByType :: String -> ExceptT Error Aff (Array Plugin)
+getPluginsByType type' = do
+  filter (\(Plugin m) -> elem type' m.type) <$> getPlugins
+
+getPlugins :: ExceptT Error Aff (Array Plugin)
+getPlugins = do
+  response <- lift $ get (ResponseFormat.string) $ "plugins.json"
+  jsonString <- case response.body of
+    Right jsonString -> pure jsonString
+    Left err -> throwError $ error $ "Failed to fetch plugin meta: " <> printResponseFormatError err
+
+  case runExcept $ parseJSON jsonString >>= flip index "plugins" >>= decode of
+    Right plugins -> pure plugins
+    Left err -> throwError $ error $ "Failed to parse plugin meta: " <> show err
 
 type PluginErrorFn = EffectFn1 Error Unit
 type PluginSuccessFn = EffectFn1 Foreign Unit

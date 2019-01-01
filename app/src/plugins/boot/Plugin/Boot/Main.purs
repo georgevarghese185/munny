@@ -6,9 +6,7 @@ import Prelude
 
 import App.Interface (setupInterface)
 import App.Interface.Events (setupEvents)
-import App.Plugin (loadPlugin)
-import App.Plugin as Plugin
-import App.Plugin.Meta (Plugin(..), getPluginsByType)
+import App.Plugin (Plugin(..), getPluginsByType, initialize, loadPlugin)
 import Control.Monad.Except (ExceptT, runExceptT, throwError)
 import Data.Array (elem, head)
 import Data.Either (Either(..), either)
@@ -26,7 +24,7 @@ main :: Effect Unit
 main = do
   setupInterface
   setupEvents
-  Plugin.initialize
+  initialize
   log "Boot complete"
   runAff_ handler $ runExceptT start >>= either (throwException >>> liftEffect) pure
   where
