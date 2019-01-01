@@ -8,7 +8,7 @@ import App.Interface (setupInterface)
 import App.Interface.Events (setupEvents)
 import App.Plugin (loadPlugin)
 import App.Plugin as Plugin
-import App.Plugin.Meta (PluginMeta(..), getPluginsByType)
+import App.Plugin.Meta (Plugin(..), getPluginsByType)
 import Control.Monad.Except (ExceptT, runExceptT, throwError)
 import Data.Array (elem, head)
 import Data.Either (Either(..), either)
@@ -38,7 +38,7 @@ main = do
 start :: ExceptT Error Aff Unit
 start = do
   plugins <- getPluginsByType "main"
-  (PluginMeta p) <- case head plugins of
+  (Plugin p) <- case head plugins of
     Nothing -> throwError $ error "No main plugin found"
     Just p -> pure p
   let input = if elem "ui" p.inputs

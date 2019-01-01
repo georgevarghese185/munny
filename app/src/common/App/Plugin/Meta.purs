@@ -17,28 +17,28 @@ import Foreign.Generic (defaultOptions, genericDecode, genericEncode)
 import Foreign.Index (index)
 import Foreign.JSON (parseJSON)
 
-newtype PluginMeta = PluginMeta {
+newtype Plugin = Plugin {
   name :: String
 , type :: Array String
 , inputs :: Array String
 , outputs :: Array String
 }
 
-derive instance newtypePluginMeta :: Newtype PluginMeta _
-derive instance genericPluginMeta :: Generic PluginMeta _
-instance encodePluginMeta :: Encode PluginMeta where encode = genericEncode defaultOptions {unwrapSingleConstructors = true}
-instance decodePluginMeta :: Decode PluginMeta where decode = genericDecode defaultOptions {unwrapSingleConstructors = true}
+derive instance newtypePlugin :: Newtype Plugin _
+derive instance genericPlugin :: Generic Plugin _
+instance encodePlugin :: Encode Plugin where encode = genericEncode defaultOptions {unwrapSingleConstructors = true}
+instance decodePlugin :: Decode Plugin where decode = genericDecode defaultOptions {unwrapSingleConstructors = true}
 
 
-getPluginMeta :: String -> ExceptT Error Aff (Maybe PluginMeta)
-getPluginMeta pluginName = do
-  find (\(PluginMeta m) -> m.name == pluginName) <$> getPlugins
+getPlugin :: String -> ExceptT Error Aff (Maybe Plugin)
+getPlugin pluginName = do
+  find (\(Plugin m) -> m.name == pluginName) <$> getPlugins
 
-getPluginsByType :: String -> ExceptT Error Aff (Array PluginMeta)
+getPluginsByType :: String -> ExceptT Error Aff (Array Plugin)
 getPluginsByType type' = do
-  filter (\(PluginMeta m) -> elem type' m.type) <$> getPlugins
+  filter (\(Plugin m) -> elem type' m.type) <$> getPlugins
 
-getPlugins :: ExceptT Error Aff (Array PluginMeta)
+getPlugins :: ExceptT Error Aff (Array Plugin)
 getPlugins = do
   response <- lift $ get (ResponseFormat.string) $ "plugins.json"
   jsonString <- case response.body of
