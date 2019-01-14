@@ -4,9 +4,6 @@ module Plugin.Home.Main (
 
 import Prelude
 
-import App ((<|>))
-import App.Interface (exit)
-import App.Interface.Events (Event(..), on)
 import App.Plugin (Plugin, getPluginsByType, pluginReady)
 import App.Plugin.UI (wait)
 import Control.Monad.Except (runExceptT, throwError)
