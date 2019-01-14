@@ -27,13 +27,13 @@ inputsDialogRendered (InputsDialogRendered id) = Just id
 inputsDialogRendered _ = Nothing
 
 
-selectService :: HomeScreenUi -> Aff Unit
-selectService ui = on BackPressed (exitAddAccount ui) <|> do
+addAccount :: HomeScreenUi -> Array String -> Aff Unit
+addAccount ui services = on BackPressed (exitAddAccount ui) <|> do
   modifyState ui $ modify _dialogs (set _selectorDialog {
     visible: true
   , title: ""
   , label: "Select a Service..."
-  , options: ["HDFC", "ICICI"]
+  , options: services
   })
   service <- wait ui serviceSelected
   modifyState ui $ modify _dialogs (
@@ -42,10 +42,10 @@ selectService ui = on BackPressed (exitAddAccount ui) <|> do
       visible: true
     , serviceName: service
     })
-  serviceInputs ui service
+  serviceInputs ui services service
 
-serviceInputs :: HomeScreenUi -> String -> Aff Unit
-serviceInputs ui service = on BackPressed (selectService ui) <|> do
+serviceInputs :: HomeScreenUi -> Array String -> String -> Aff Unit
+serviceInputs ui services service = on BackPressed (addAccount ui services) <|> do
   modifyState ui $ modify _dialogs (
     modify _selectorDialog (set _visible false) >>>
     set _inputsDialog {

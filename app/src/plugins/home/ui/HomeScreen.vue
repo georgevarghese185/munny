@@ -36,11 +36,10 @@
   export default {
     props: ["initialState", "onEvent", "setStateListener"],
     data: function() {
-      let { app, accounts, services, encryptOptions, viewers, dialogs } = this.initialState;
+      let { app, accounts, encryptOptions, viewers, dialogs } = this.initialState;
       return {
         app,
         accounts,
-        services,
         encryptOptions,
         viewers,
         dialogs

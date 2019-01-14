@@ -44,7 +44,6 @@ type HomeScreenState = {
   , pluginDir :: String
   }
 , accounts :: Array Account
-, services :: Array String
 , encryptOptions :: Array String
 , viewers :: Array String
 , dialogs :: {
@@ -134,7 +133,6 @@ initialState = {
   , pluginDir: pluginDir
   }
 , accounts: []
-, services: []
 , encryptOptions: []
 , viewers: []
 , dialogs: {
