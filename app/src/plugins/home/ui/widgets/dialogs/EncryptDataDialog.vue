@@ -32,7 +32,7 @@
         this.selected = selected;
       },
       onOK: function() {
-        this.$emit("encryptionSelct", this.selected);
+        this.$emit("done", this.selected);
       }
     },
     components: {

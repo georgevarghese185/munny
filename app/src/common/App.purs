@@ -1,15 +1,13 @@
 module App where
 
-import Prelude
 
-import Control.Parallel (parallel, sequential)
-import Data.Foldable (oneOf)
-import Effect.Aff (Aff)
+import Control.Alternative (class Alternative)
+import Control.Parallel (class Parallel, parOneOf)
 
 appName :: String
 appName = "Munny"
 
-orAff :: forall a. Aff a -> Aff a -> Aff a
-orAff aff1 aff2 = sequential $ oneOf [parallel aff1, parallel aff2]
+parallel :: forall f m a. Parallel f m => Alternative f => m a -> m a -> m a
+parallel f1 f2 = parOneOf [f1, f2]
 
-infixl 1 orAff as <|>
+infixl 1 parallel as <|>

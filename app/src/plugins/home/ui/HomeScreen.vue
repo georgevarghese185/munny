@@ -4,10 +4,10 @@
     <NavBar :app="app" :title="app.name"/>
 		<SelectorDialog v-if="dialogs.selectorDialog.visible" :visible="dialogs.selectorDialog" :title="dialogs.selectorDialog.title"
       :label="dialogs.selectorDialog.label" :options="dialogs.selectorDialog.options" @done="onSelectorDialogDone"/>
-		<InputsDialog :visible="dialogs.inputsDialog.visible" :serviceName="dialogs.inputsDialog.serviceName"/>
-		<EncryptDataDialog :visible="dialogs.encryptDialog.visible" :encryptOptions="dialogs.encryptDialog.options"/>
-		<PasswordDialog title="Enter a PIN" :visible="dialogs.passwordDialog.visible" :isNumberPin="dialogs.passwordDialog.isNumberPin"/>
-		<SimpleDialog :visible="dialogs.simpleDialog.visible" :message="dialogs.simpleDialog.message"/>
+		<InputsDialog :visible="dialogs.inputsDialog.visible" :serviceName="dialogs.inputsDialog.serviceName" @ready="onInputsDialogReady"/>
+		<EncryptDataDialog :visible="dialogs.encryptDialog.visible" :encryptOptions="dialogs.encryptDialog.options" @done="onEncryptionSelect"/>
+		<PasswordDialog title="Enter a PIN" :visible="dialogs.passwordDialog.visible" :isNumberPin="dialogs.passwordDialog.isNumberPin" @done="onPasswordEnter"/>
+		<SimpleDialog :visible="dialogs.simpleDialog.visible" :message="dialogs.simpleDialog.message" @done="onOkClick"/>
 		<SyncDialog :visible="dialogs.syncDialog.visible" :app="app" :accounts="dialogs.syncDialog.accounts"/>
     <Accounts :app="app" :accounts="accounts" @addAccount="onAddAccount"/>
     <div class="bottom-buttons-container">
@@ -63,6 +63,18 @@
       },
       onViewDetailsClick: function() {
         this.onEvent('ViewDetailsClick')
+      },
+      onInputsDialogReady: function(id) {
+        this.onEvent('InputsDialogRendered', id)
+      },
+      onEncryptionSelect: function(choice) {
+        this.onEvent('EncryptOption', choice);
+      },
+      onOkClick: function() {
+        this.onEvent('OkClick');
+      },
+      onPasswordEnter: function(password) {
+        this.onEvent('PasswordEnter', password);
       }
     },
     components: {

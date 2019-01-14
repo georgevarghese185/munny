@@ -17,8 +17,9 @@ import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Effect.Class.Console as Console
 import Effect.Exception (throwException)
-import Foreign (Foreign, unsafeToForeign)
+import Foreign (Foreign)
 import Foreign.Class (encode)
+import Simple.JSON (write)
 
 main :: Effect Unit
 main = do
@@ -40,7 +41,7 @@ start = do
     Nothing -> throwError $ error "No main plugin found"
     Just p -> pure p
   let input = if elem "ui" p.inputs
-        then unsafeToForeign {ui: "#root"}
+        then write {inputs: {ui: "#root"}}
         else encode (Nothing :: Maybe Foreign)
   void $ loadPlugin p.name input
   pure unit

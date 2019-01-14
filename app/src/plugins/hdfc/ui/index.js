@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import Inputs from './Inputs.vue'
 
 const createVue = (id, initialState, onEvent, setStateListener) => {

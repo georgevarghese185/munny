@@ -5,7 +5,7 @@
       {{serviceName}} requires the following inputs
     </template>
     <div class="dialog-contents">
-      <div id="service-inputs"/>
+      <div :id="dialogId"/>
     </div>
   </Dialog>
 
@@ -19,9 +19,21 @@
 
 	export default {
     props: ["serviceName", "visible"],
+		data: function() {
+			return {
+				dialogId: "inputs"
+			}
+		},
     components: {
       Dialog
-    }
+    },
+		watch: {
+			visible: function(visible) {
+				if(visible) {
+					this.$emit('ready', "#" + this.dialogId)
+				}
+			}
+		}
   }
 
 </script>

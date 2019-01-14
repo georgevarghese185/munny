@@ -6,7 +6,6 @@ import Prelude
 
 import App.Plugin (pluginReady)
 import App.Plugin.UI (wait)
-import Control.Alt ((<|>))
 import Control.Monad.Error.Class (throwError)
 import Data.Either (Either(..))
 import Data.Foldable (elem)
@@ -34,7 +33,7 @@ main = pluginReady pluginName start
 
 start :: Foreign -> Aff Foreign
 start inputs =
-  accountFetch inputs <|> settingsRequest inputs
+  settingsRequest inputs
 
 settingsDone :: SettingsScreenEvent -> Maybe HdfcSettings
 settingsDone (SettingsDone customerId password) = Just {customerId, password}
@@ -44,14 +43,10 @@ settingsRequest fgn = do
   (p :: Params) <- case read fgn of
     Right inputs' -> pure inputs'
     Left e -> throwError $ error $ show e
-  if elem "service-accounts-settings" p.outputs
+  if elem "serviceAccountSettings" p.outputs
     then pure unit
     else throwError $ error "Unknown request"
   let currentSettings = p.inputs.serviceAccountSettings
   ui <- liftEffect $ startSettingsScreen p.inputs.ui currentSettings
   settings <- wait ui settingsDone
   pure $ write settings
-
-
-accountFetch :: Foreign -> Aff Foreign
-accountFetch inputs = pure inputs
