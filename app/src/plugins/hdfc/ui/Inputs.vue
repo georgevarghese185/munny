@@ -2,9 +2,9 @@
 
 	<div class="dialog-contents">
     <p class="sensitive light-text"> *Sensitive </p>
-    <input class="field" type="email" placeholder="Customer ID" :value="customerId"/>
+    <input class="field" type="email" placeholder="Customer ID" v-model="customerId"/>
     <p class="sensitive light-text"> *Sensitive </p>
-    <input class="field" type="password" placeholder="Password" :value="password"/>
+    <input class="field" type="password" placeholder="Password" v-model="password"/>
     <p class="sensitive-note light-text"> *Sensitive fields will be encrypted and stored on your device </p>
     <Button label="OK" @click="onOkClick"/>
   </div>
