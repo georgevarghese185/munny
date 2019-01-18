@@ -27,7 +27,7 @@
 		},
 		methods: {
 			onOkClick: function() {
-				this.onEvent("done", this.customerId, this.password)
+				this.onEvent("SettingsDone", this.customerId, this.password)
 			}
 		},
     components: { Button }

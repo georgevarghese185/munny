@@ -23,8 +23,8 @@ type SettingsScreenState = {
 type SettingsScreenUi = Ui SettingsScreenState SettingsScreenEvent
 
 derive instance genericSettingsScreenEvent :: Generic SettingsScreenEvent _
-instance encodeSettingsScreenEvent :: Encode SettingsScreenEvent where encode = genericEncode defaultOptions{unwrapSingleConstructors=true}
-instance decodeSettingsScreenEvent :: Decode SettingsScreenEvent where decode = genericDecode defaultOptions{unwrapSingleConstructors=true}
+instance encodeSettingsScreenEvent :: Encode SettingsScreenEvent where encode = genericEncode defaultOptions
+instance decodeSettingsScreenEvent :: Decode SettingsScreenEvent where decode = genericDecode defaultOptions
 
 data SettingsScreenEvent =
   SettingsDone String String
