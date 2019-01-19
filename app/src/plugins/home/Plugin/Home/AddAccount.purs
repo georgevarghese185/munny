@@ -7,9 +7,9 @@ import Prelude
 import App ((<|>))
 import App.Interface.Events (Event(..), on)
 import App.Interface.SecureDevice (DeviceSecureStatus(..), KeyAlias(..), isDeviceSecure, secureEncrypt)
+import App.Interface.Storage (store)
 import App.Plugin (loadPlugin)
 import App.Plugin.UI (wait)
-import App.Storage (store)
 import Control.Monad.Except (ExceptT, lift, runExceptT, throwError)
 import Data.Bifunctor (bimap)
 import Data.Either (Either(..), either)
@@ -19,7 +19,6 @@ import Effect.Aff as E
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Foreign (Foreign)
-import Foreign.Class (encode)
 import Foreign.Generic (encodeJSON)
 import Node.Crypto.Cipher (Algorithm(..))
 import Node.Crypto.Cipher as Cipher
@@ -105,7 +104,7 @@ encryptSettings ui back serviceSettings serviceName = backable do
   encryptedSettings <- lift $ encryptFn $ encodeJSON serviceSettings
   case encryptedSettings of
     Right s -> do
-      lift $ store (Keys.serviceSettings serviceName) (encode s)
+      lift $ store (Keys.serviceSettings serviceName) (encodeJSON s)
       lift $ UI.showSimpleDialog ui "Account added"
       lift (wait ui Events.okClicked)
       lift $ UI.hideSimpleDialog ui
