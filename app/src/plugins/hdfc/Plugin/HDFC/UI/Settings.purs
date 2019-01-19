@@ -36,7 +36,6 @@ startSettingsScreen id currentSettings = do
   updateStateFn <- runEffectFn2 startSettingsScreenImpl id (mkEffectFn2 onEvent)
   let stateUpdater state = do
         runEffectFn1 updateStateFn state
-        onStateUpdate ui stateUpdater
         pure true
   onStateUpdate ui stateUpdater
   updateState ui $ maybe {customerId: "", password: ""} identity currentSettings

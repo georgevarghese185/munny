@@ -286,7 +286,6 @@ startHomeScreen rootId = do
   updateStateFn <- runEffectFn2 startHomeScreenImpl rootId (mkEffectFn2 onEvent)
   let stateUpdater state = do
         runEffectFn1 updateStateFn (write state)
-        onStateUpdate ui stateUpdater
         pure true
   onStateUpdate ui stateUpdater
   updateState ui initialState
