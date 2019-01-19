@@ -13,7 +13,7 @@ import Prelude
 
 import Affjax (get, printResponseFormatError)
 import Affjax.ResponseFormat as ResponseFormat
-import Control.Monad.Except (ExceptT, catchError, runExcept, throwError)
+import Control.Monad.Except (ExceptT(..), catchError, runExcept, throwError)
 import Control.Monad.Maybe.Trans (MaybeT(..), lift, runMaybeT)
 import Data.Array (elem, filter)
 import Data.Either (Either(..), either)
@@ -22,7 +22,7 @@ import Data.Generic.Rep (class Generic)
 import Data.Maybe (Maybe, maybe)
 import Data.Newtype (class Newtype)
 import Effect (Effect)
-import Effect.Aff (Aff, Error, error, makeAff, nonCanceler, runAff_)
+import Effect.Aff (Aff, Error, cancelWith, effectCanceler, error, makeAff, nonCanceler, runAff_)
 import Effect.Class (liftEffect)
 import Effect.Exception (throw, throwException)
 import Effect.Uncurried (EffectFn1, EffectFn2, EffectFn3, mkEffectFn1, mkEffectFn2, mkEffectFn3, mkEffectFn4, runEffectFn1, runEffectFn2, runEffectFn3)
@@ -107,7 +107,12 @@ initialize = runEffectFn1 setPluginsObjectImpl $ unsafeToForeign {
 
 
 loadPlugin :: String -> Foreign -> ExceptT Error Aff Foreign
-loadPlugin pluginName input = catchError (lift $ loadPlugin_ pluginName input) throwError
+loadPlugin pluginName input = ExceptT $ flip cancelWith
+  (effectCanceler $ unloadPlugin pluginName)
+  do
+    result <- catchError (Right <$> loadPlugin_ pluginName input) (Left >>> pure)
+    liftEffect $ unloadPlugin pluginName
+    pure result
 
 
 loadPlugin_ :: String -> Foreign -> Aff Foreign
