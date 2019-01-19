@@ -3,7 +3,7 @@
 	<Dialog :visible="visible">
 		<div class="dialog-contents">
 			<p class="message"> {{message}} </p>
-			<Button label="OK" @click="this.emit('done')"/>
+			<Button label="OK" @click="onOkClick"/>
 		</div>
 	</Dialog>
 
@@ -18,7 +18,12 @@
 
 	export default {
 		props: ["message", "visible"],
-		components: { Dialog, Button }
+		components: { Dialog, Button },
+		methods: {
+			onOkClick: function() {
+				this.$emit("done");
+			}
+		}
 	}
 
 </script>
