@@ -5,8 +5,10 @@ import Prelude
 import App.Interface (setupInterface)
 import App.Interface.Events (setupEvents)
 import App.Interface.SecureDevice (DeviceSecureStatus(..), KeyAlias(..), authenticateUser, isDeviceSecure, secureDecrypt, secureEncrypt)
+import App.Interface.Storage (clear, get, store)
 import App.Interface.WebScripter (Script(..), ScriptStep(..), ScripterId(..), createScripter, executeScripter, hideScripter, killScripter, showScripter)
 import Data.Either (Either(..), either)
+import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff_)
 import Effect.Class.Console (error, log, logShow, warn)
@@ -28,6 +30,7 @@ app = do
   case deviceSecure of
     Secure -> authEncryptionTest
     _ -> error $ "Can't test auth encryption"
+  storageTest
 
 scripterTest :: Aff Unit
 scripterTest = do
@@ -80,3 +83,17 @@ authEncryptionTest = do
     Right cipher -> do
       warn $ "Authed Encryption successful" <> show cipher
       secureDecrypt cipher authedKey true >>= either (show >>> append "authed decrypt error: " >>> error) (\d -> if d == encryptData then warn "Authed Decryption Successful" else error ("Incorrect authed decrypt: " <> d))
+
+storageTest :: Aff Unit
+storageTest = do
+  store "test_key" "test_value"
+  got <- get "test_key"
+  case got of
+    Just "test_value" -> warn "Storate test successful"
+    Just d -> warn $ "Storage test failed: different data - " <> d
+    _ -> error $ "Storage test failed: Returned null"
+  clear "test_key"
+  got' <- get "test_key"
+  case got' of
+    Nothing -> warn "Storate clear test successful"
+    Just d -> warn $ "Storage clear test failed: Non null value - " <> d

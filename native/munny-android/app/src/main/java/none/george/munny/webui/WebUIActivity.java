@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
@@ -33,6 +34,7 @@ import none.george.munny.webscripter.Script;
 import none.george.munny.webscripter.WebScripter;
 import none.george.munny.webui.utilities.AppServer;
 import none.george.munny.webui.utilities.SmsReader;
+import none.george.munny.webui.utilities.Storage;
 import none.george.munny.webui.utilities.secrets.AuthenticationHelper;
 import none.george.munny.webui.utilities.secrets.EncryptionHelper;
 import none.george.munny.webui.utilities.secrets.EncryptionException;
@@ -435,6 +437,37 @@ public class WebUIActivity extends AppCompatActivity {
     public void deleteSecureKey(String keyName) {
         EncryptionHelper helper = new EncryptionHelper(this);
         helper.deleteKey(keyName);
+    }
+
+    /**
+     * Store a String key value pair in SharedPreferences
+     *
+     * @param key Key to use for SharedPreferences
+     * @param value String value that will be stored in SharedPreferences
+     */
+    @JavascriptInterface
+    public void storeData(String key, String value) {
+        Storage.store(this, key, value);
+    }
+
+    /**
+     * Get a String value stored in SharedPreferences
+     * @param key Key used when storing the value in SharedPreferences
+     * @return Returns the stored String value or null if not found.
+     */
+    @Nullable
+    @JavascriptInterface
+    public String getData(String key) {
+        return Storage.get(this, key);
+    }
+
+    /**
+     * Delete a key value pair that may be stored in SharedPreferences
+     * @param key Key of the key value pair stored in SharedPreferences
+     */
+    @JavascriptInterface
+    public void clearData(String key) {
+        Storage.clear(this, key);
     }
 
 
