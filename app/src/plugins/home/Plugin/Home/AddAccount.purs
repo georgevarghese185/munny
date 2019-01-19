@@ -65,8 +65,9 @@ serviceInputs :: HomeScreenUi -> (Aff Unit) -> String -> Aff Unit
 serviceInputs ui back serviceName = backable do
   lift $ UI.showInputsDialog ui serviceName
   divId <- lift (wait ui Events.inputsDialogRendered) <|> onBack (UI.hideInputsDialog ui *> back)
-  serviceSettings <- lift $ either throwError pure =<< runExceptT
-    (loadPlugin serviceName $ write {inputs: {ui: divId}, outputs: ["serviceAccountSettings"]})
+  let inputs = write {inputs: {ui: divId}, outputs: ["serviceAccountSettings"]}
+  let getSettings = either throwError pure =<< runExceptT (loadPlugin serviceName inputs)
+  serviceSettings <- lift getSettings <|> onBack (UI.hideInputsDialog ui *> back)
   lift $ UI.hideInputsDialog ui
   lift $ encryptSettings ui (serviceInputs ui back serviceName) serviceSettings serviceName
 
