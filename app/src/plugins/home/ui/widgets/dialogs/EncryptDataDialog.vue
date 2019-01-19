@@ -2,7 +2,7 @@
 
 	<Dialog :visible="visible">
     <template slot="title">
-      How do want to encrypt the sensitive information?
+      How do you want to encrypt this data?
     </template>
     <div class="dialog-contents">
       <RadioSelector :options="encryptOptions" @select="onSelect"/>
