@@ -17,7 +17,7 @@ import Effect.Exception (error)
 import Foreign (Foreign)
 import Plugin.HDFC (pluginName)
 import Plugin.HDFC.Settings (HdfcSettings)
-import Plugin.HDFC.UI.Settings (SettingsScreenEvent(..), startSettingsScreen)
+import Plugin.HDFC.UI.SettingsScreen (SettingsScreenEvent(..), startSettingsScreen)
 import Simple.JSON (read, write)
 
 type Params = {

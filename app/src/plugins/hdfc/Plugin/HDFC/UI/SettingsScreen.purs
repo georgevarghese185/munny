@@ -1,4 +1,4 @@
-module Plugin.HDFC.UI.Settings where
+module Plugin.HDFC.UI.SettingsScreen where
 
 import Prelude
 
