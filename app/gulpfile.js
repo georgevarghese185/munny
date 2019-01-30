@@ -163,9 +163,9 @@ gulp.task('purescript-compile', ['init'], compilePurescript);
 // build purescript plugins
 gulp.task('purescript-build', ['init'], buildPurescript);
 
-// Build purescript plugins for debug (no bundling) 
+// Build purescript plugins for debug (no bundling)
 gulp.task('purescript-debug', ['init'], async function() {
-  await compilePurescript();
+  try { await compilePurescript(); } catch(e) { console.log(e); }
   await Promise.all(
     PLUGINS.filter(plugin => plugin.build.type === "purs")
     .map(plugin =>
