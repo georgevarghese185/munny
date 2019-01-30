@@ -1,7 +1,7 @@
 {
   "name": "app",
-  "set": "aff-bus-v4.0.0",
-  "source": "https://github.com/georgevarghese185/package-sets.git",
+  "set": "psc-0.12.2",
+  "source": "https://github.com/purescript/package-sets.git",
   "depends": [
     "aff-bus",
     "crypto",
