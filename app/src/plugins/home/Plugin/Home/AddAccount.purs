@@ -92,12 +92,12 @@ encryptSettings ui back serviceSettings serviceName = backable do
       lift $ UI.hideSimpleDialog ui
       pure $ encryptWithSystemKey serviceName
     Pin -> do
-      lift $ UI.showPasswordDialog ui "Provide a password for encrypting your inputs" true
+      lift $ UI.showPasswordDialog ui "Provide a password for encrypting your inputs" "number_password"
       password <- lift (wait ui Events.passwordEntered) <|> onBack (UI.hidePasswordDialog ui *> chooseAgain)
       lift $ UI.hidePasswordDialog ui
       pure $ encryptWithPassword password
     Password -> do
-      lift $ UI.showPasswordDialog ui "Provide a password for encrypting your inputs" false
+      lift $ UI.showPasswordDialog ui "Provide a password for encrypting your inputs" "password"
       password <- lift (wait ui Events.passwordEntered) <|> onBack (UI.hidePasswordDialog ui *> chooseAgain)
       lift $ UI.hidePasswordDialog ui
       pure $ encryptWithSystemKey password

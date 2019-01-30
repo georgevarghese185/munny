@@ -5,11 +5,11 @@
       {{title}}
     </template>
     <div class="dialog-contents">
-      <input :class="{password: true, pin:isNumberPin}" v-model="password"
-        :type="isNumberPin ? 'number' : 'password'"
+      <input :class="{'text-input': true, pin:isNumberPin}" v-model="input"
+        :type="isNumberPin ? 'number' : (isPassword ? 'password' : '')"
         :pattern="isNumberPin ? '[0123456789]+' :'*'"
         @change="validate"/>
-      <Button label="OK" :disabled="password.length < 4" @click="onOK"/>
+      <Button label="OK" :disabled="input.length < 4" @click="onOK"/>
     </div>
   </Dialog>
 
@@ -22,24 +22,45 @@
   import Dialog from './Dialog.vue'
   import Button from '../Button.vue'
 
+	const InputTypes = {
+		TEXT: "text",
+		PASSWORD: "password",
+		NUMBER_PASSWORD: "number_password"
+	}
+
+	export { InputTypes }
+
 	export default {
-    props: ["visible", "title", "isNumberPin"],
+    props: ["visible", "title", "inputType"],
     data: function() {
       return {
-        password: ""
+        input: ""
       }
     },
+		computed: {
+			isPassword: function() {
+				return this.inputType == InputTypes.PASSWORD || this.inputType == InputTypes.NUMBER_PASSWORD;
+			},
+			isNumberPin: function() {
+				return this.inputType == InputTypes.NUMBER_PASSWORD;
+			}
+		},
     components: {
       Dialog,
       Button
     },
+		watch: {
+			inputType: function() {
+				this.input = "";
+			}
+		},
     methods: {
       onOK: function() {
-        this.$emit("done", password)
+        this.$emit("done", input)
       },
       validate: function() {
         if(this.isNumberPin) {
-          this.$set("password", this.password.replace(/^[0-9]/g, ""));
+					this.input = this.input.replace(/^[0-9]/g, "");
         }
       }
     }
@@ -60,7 +81,7 @@
     padding: 12px 12px;
   }
 
-  .password {
+  .text-input {
     border: 1px solid #000000;
     background-color: #ffffff;
     font-size: 18px;

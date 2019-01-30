@@ -75,7 +75,7 @@ type HomeScreenState = {
   , passwordDialog :: {
       visible :: Boolean
     , title :: String
-    , isNumberPin :: Boolean
+    , inputType :: String
     }
   , simpleDialog :: {
       visible :: Boolean
@@ -153,12 +153,12 @@ hidePasswordDialog :: HomeScreenUi -> Aff Unit
 hidePasswordDialog ui =
   modifyState ui $ modify _dialogs (modify _passwordDialog (set _visible false))
 
-showPasswordDialog :: HomeScreenUi -> String -> Boolean -> Aff Unit
-showPasswordDialog ui title isNumberPin =
+showPasswordDialog :: HomeScreenUi -> String -> String -> Aff Unit
+showPasswordDialog ui title inputType =
   modifyState ui $ modify _dialogs (set _passwordDialog {
     visible: true
   , title
-  , isNumberPin
+  , inputType
   })
 
 hideSimpleDialog :: HomeScreenUi -> Aff Unit
@@ -256,7 +256,7 @@ initialState = {
   , passwordDialog: {
       visible: false
     , title: ""
-    , isNumberPin: false
+    , inputType: "text"
     }
   , simpleDialog: {
       visible: false

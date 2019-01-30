@@ -6,7 +6,7 @@
       :label="dialogs.selectorDialog.label" :options="dialogs.selectorDialog.options" @done="onSelectorDialogDone"/>
 		<InputsDialog :visible="dialogs.inputsDialog.visible" :serviceName="dialogs.inputsDialog.serviceName" @ready="onInputsDialogReady"/>
 		<EncryptDataDialog :visible="dialogs.encryptDialog.visible" :encryptOptions="dialogs.encryptDialog.options" @done="onEncryptionSelect"/>
-		<PasswordDialog title="Enter a PIN" :visible="dialogs.passwordDialog.visible" :isNumberPin="dialogs.passwordDialog.isNumberPin" @done="onPasswordEnter"/>
+		<PasswordDialog :title="dialogs.passwordDialog.title" :visible="dialogs.passwordDialog.visible" :inputType="dialogs.passwordDialog.inputType" @done="onInput"/>
 		<SimpleDialog :visible="dialogs.simpleDialog.visible" :message="dialogs.simpleDialog.message" @done="onOkClick"/>
 		<SyncDialog :visible="dialogs.syncDialog.visible" :app="app" :accounts="dialogs.syncDialog.accounts"/>
     <Accounts :app="app" :accounts="accounts" @addAccount="onAddAccount"/>
@@ -73,7 +73,7 @@
       onOkClick: function() {
         this.onEvent('OkClick');
       },
-      onPasswordEnter: function(password) {
+      onInput: function(password) {
         this.onEvent('PasswordEnter', password);
       }
     },
