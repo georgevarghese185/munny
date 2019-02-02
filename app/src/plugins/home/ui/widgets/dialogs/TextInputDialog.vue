@@ -5,7 +5,7 @@
       {{title}}
     </template>
     <div class="dialog-contents">
-      <input :class="{'text-input': true, pin:isNumberPin}" v-model="input"
+      <input :class="{'text-input': true, pin:isNumberPin, secure: isNumberPin || isPassword}" v-model="input"
         :type="isNumberPin ? 'number' : (isPassword ? 'password' : '')"
         :pattern="isNumberPin ? '[0123456789]+' :'*'"
         @change="validate"/>
@@ -56,7 +56,7 @@
 		},
     methods: {
       onOK: function() {
-        this.$emit("done", input)
+        this.$emit("done", this.input)
       },
       validate: function() {
         if(this.isNumberPin) {
@@ -87,8 +87,11 @@
     font-size: 18px;
     width: 90%;
     height: 42px;
-    -webkit-text-security: disc;
   }
+
+	.secure {
+		-webkit-text-security: disc;
+	}
 
   .pin {
     text-align: center;

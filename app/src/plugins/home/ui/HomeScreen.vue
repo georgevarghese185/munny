@@ -6,7 +6,7 @@
       :label="dialogs.selectorDialog.label" :options="dialogs.selectorDialog.options" @done="onSelectorDialogDone"/>
 		<InputsDialog :visible="dialogs.inputsDialog.visible" :serviceName="dialogs.inputsDialog.serviceName" @ready="onInputsDialogReady"/>
 		<EncryptDataDialog :visible="dialogs.encryptDialog.visible" :encryptOptions="dialogs.encryptDialog.options" @done="onEncryptionSelect"/>
-		<PasswordDialog :title="dialogs.passwordDialog.title" :visible="dialogs.passwordDialog.visible" :inputType="dialogs.passwordDialog.inputType" @done="onInput"/>
+		<TextInputDialog :title="dialogs.textInputDialog.title" :visible="dialogs.textInputDialog.visible" :inputType="dialogs.textInputDialog.inputType" @done="onInput"/>
 		<SimpleDialog :visible="dialogs.simpleDialog.visible" :message="dialogs.simpleDialog.message" @done="onOkClick"/>
 		<SyncDialog :visible="dialogs.syncDialog.visible" :app="app" :accounts="dialogs.syncDialog.accounts"/>
     <Accounts :app="app" :accounts="accounts" @addAccount="onAddAccount"/>
@@ -28,7 +28,7 @@
   import SelectorDialog from './widgets/dialogs/SelectorDialog.vue'
 	import InputsDialog from './widgets/dialogs/InputsDialog.vue'
 	import EncryptDataDialog from './widgets/dialogs/EncryptDataDialog.vue'
-	import PasswordDialog from './widgets/dialogs/PasswordDialog.vue'
+	import TextInputDialog from './widgets/dialogs/TextInputDialog.vue'
 	import SimpleDialog from './widgets/dialogs/SimpleDialog.vue'
 	import SyncDialog from './widgets/dialogs/SyncDialog.vue'
   import { updateVue } from 'src/common/ui/util.js'
@@ -74,12 +74,12 @@
         this.onEvent('OkClick');
       },
       onInput: function(password) {
-        this.onEvent('PasswordEnter', password);
+        this.onEvent('TextEnter', password);
       }
     },
     components: {
       Button, NavBar, Accounts, SelectorDialog, InputsDialog, EncryptDataDialog,
-			PasswordDialog, SimpleDialog, SyncDialog
+			TextInputDialog, SimpleDialog, SyncDialog
     }
   }
 

@@ -72,7 +72,7 @@ type HomeScreenState = {
       visible :: Boolean
     , options :: Array String
     }
-  , passwordDialog :: {
+  , textInputDialog :: {
       visible :: Boolean
     , title :: String
     , inputType :: String
@@ -103,7 +103,7 @@ _label = SProxy :: SProxy "label"
 _inputsDialog = SProxy :: SProxy "inputsDialog"
 _serviceName = SProxy :: SProxy "serviceName"
 _encryptDialog = SProxy :: SProxy "encryptDialog"
-_passwordDialog = SProxy :: SProxy "passwordDialog"
+_textInputDialog = SProxy :: SProxy "textInputDialog"
 _syncDialog = SProxy :: SProxy "syncDialog"
 _options = SProxy :: SProxy "options"
 _isNumberPin = SProxy :: SProxy "isNumberPin"
@@ -149,13 +149,13 @@ showEncryptDialog ui options =
   , options
   })
 
-hidePasswordDialog :: HomeScreenUi -> Aff Unit
-hidePasswordDialog ui =
-  modifyState ui $ modify _dialogs (modify _passwordDialog (set _visible false))
+hideTextInputDialog :: HomeScreenUi -> Aff Unit
+hideTextInputDialog ui =
+  modifyState ui $ modify _dialogs (modify _textInputDialog (set _visible false))
 
-showPasswordDialog :: HomeScreenUi -> String -> String -> Aff Unit
-showPasswordDialog ui title inputType =
-  modifyState ui $ modify _dialogs (set _passwordDialog {
+showTextInputDialog :: HomeScreenUi -> String -> String -> Aff Unit
+showTextInputDialog ui title inputType =
+  modifyState ui $ modify _dialogs (set _textInputDialog {
     visible: true
   , title
   , inputType
@@ -195,7 +195,7 @@ data HomeScreenEvent =
     AddAccountClick
   | SyncClick
   | OkClick
-  | PasswordEnter String
+  | TextEnter String
   | ViewDetailsClick
   | SelectorDialog String
   | InputsDialogRendered String
@@ -217,9 +217,9 @@ okClicked :: HomeScreenEvent -> Maybe Unit
 okClicked OkClick = Just unit
 okClicked _ = Nothing
 
-passwordEntered :: HomeScreenEvent -> Maybe String
-passwordEntered (PasswordEnter password) = Just password
-passwordEntered _ = Nothing
+textEntered :: HomeScreenEvent -> Maybe String
+textEntered (TextEnter password) = Just password
+textEntered _ = Nothing
 
 encryptOptionSelected :: HomeScreenEvent -> Maybe String
 encryptOptionSelected (EncryptOption choice) = Just choice
@@ -253,7 +253,7 @@ initialState = {
       visible: false
     , options: []
     }
-  , passwordDialog: {
+  , textInputDialog: {
       visible: false
     , title: ""
     , inputType: "text"
