@@ -59,20 +59,23 @@ addAccount ui services = backable do
   lift $ UI.showSelectorDialog ui "" "Select a Service..." services
   service <- lift (wait ui Events.serviceSelected) <|> onBack (log "back pressed" *> UI.hideSelectorDialog ui)
   lift $ UI.hideSelectorDialog ui
-  lift $ serviceInputs ui (addAccount ui services) service
+  lift $ UI.showTextInputDialog ui "Name this account" "text"
+  accountName <- lift (wait ui Events.textEntered) <|> onBack (UI.hideTextInputDialog ui *> addAccount ui services)
+  lift $ UI.hideTextInputDialog ui
+  lift $ serviceInputs ui (addAccount ui services) service accountName
 
-serviceInputs :: HomeScreenUi -> (Aff Unit) -> String -> Aff Unit
-serviceInputs ui back serviceName = backable do
+serviceInputs :: HomeScreenUi -> (Aff Unit) -> String -> String -> Aff Unit
+serviceInputs ui back serviceName accountName = backable do
   lift $ UI.showInputsDialog ui serviceName
   divId <- lift (wait ui Events.inputsDialogRendered) <|> onBack (UI.hideInputsDialog ui *> back)
   let inputs = write {inputs: {ui: divId}, outputs: ["serviceAccountSettings"]}
   let getSettings = either throwError pure =<< runExceptT (loadPlugin serviceName inputs)
   serviceSettings <- lift getSettings <|> onBack (UI.hideInputsDialog ui *> back)
   lift $ UI.hideInputsDialog ui
-  lift $ encryptSettings ui (serviceInputs ui back serviceName) serviceSettings serviceName
+  lift $ encryptSettings ui (serviceInputs ui back serviceName accountName) serviceSettings serviceName accountName
 
-encryptSettings :: HomeScreenUi -> (Aff Unit) -> Foreign -> String -> Aff Unit
-encryptSettings ui back serviceSettings serviceName = backable do
+encryptSettings :: HomeScreenUi -> (Aff Unit) -> Foreign -> String -> String ->Aff Unit
+encryptSettings ui back serviceSettings serviceName accountName = backable do
   encryptOptions <- lift $ isDeviceSecure >>= case _ of
     Secure -> pure [ScreenLock, Pin, Password, System]
     Insecure -> pure [Pin, Password, System]
@@ -80,18 +83,18 @@ encryptSettings ui back serviceSettings serviceName = backable do
   lift $ UI.showEncryptDialog ui (toUiString <$> encryptOptions)
   encryptionMethodSelected <- lift (wait ui (Events.encryptOptionSelected >=> fromUiString)) <|> onBack (UI.hideEncryptDialog ui *> back)
   lift $ UI.hideEncryptDialog ui
-  let chooseAgain = encryptSettings ui back serviceSettings serviceName
+  let chooseAgain = encryptSettings ui back serviceSettings serviceName accountName
   encryptFn <- case encryptionMethodSelected of
     ScreenLock -> do
       lift $ UI.showSimpleDialog ui "Please authenticate the next screen"
       lift (wait ui Events.okClicked) <|> onBack (UI.hideSimpleDialog ui *> chooseAgain)
       lift $ UI.hideSimpleDialog ui
-      pure $ encryptWithScreenLock serviceName
+      pure $ encryptWithScreenLock accountName
     System -> do
       lift $ UI.showSimpleDialog ui "Please authenticate the next screen"
       lift (wait ui Events.okClicked) <|> onBack (UI.hideSimpleDialog ui *> chooseAgain)
       lift $ UI.hideSimpleDialog ui
-      pure $ encryptWithSystemKey serviceName
+      pure $ encryptWithSystemKey accountName
     Pin -> do
       lift $ UI.showTextInputDialog ui "Provide a password for encrypting your inputs" "number_password"
       password <- lift (wait ui Events.textEntered) <|> onBack (UI.hideTextInputDialog ui *> chooseAgain)
@@ -105,7 +108,14 @@ encryptSettings ui back serviceSettings serviceName = backable do
   encryptedSettings <- lift $ encryptFn $ encodeJSON serviceSettings
   case encryptedSettings of
     Right s -> do
-      lift $ createAccount ui chooseAgain serviceName s
+      let account = {
+            name: accountName
+          , serviceName
+          , serviceSettings: s
+          , summary: []
+          , lastUpdated: Nothing
+          }
+      lift $ getAccounts >>= flip snoc account >>> saveAccounts
       lift $ UI.showSimpleDialog ui "Account added"
       lift (wait ui Events.okClicked)
       lift $ UI.hideSimpleDialog ui
@@ -114,21 +124,6 @@ encryptSettings ui back serviceSettings serviceName = backable do
       lift $ (wait ui Events.okClicked)
       lift $ UI.hideSimpleDialog ui
       lift $ chooseAgain
-
-createAccount :: HomeScreenUi -> (Aff Unit) -> String -> String -> Aff Unit
-createAccount ui back serviceName encryptedSettings = backable do
-  lift $ UI.showTextInputDialog ui "Name this account" "text"
-  name <- lift (wait ui Events.textEntered) <|> onBack (UI.hideTextInputDialog ui *> back)
-  lift $ UI.hideTextInputDialog ui
-  let account = {
-        name
-      , serviceName
-      , serviceSettings: encryptedSettings
-      , summary: []
-      , lastUpdated: Nothing
-      }
-  lift $ getAccounts >>= flip snoc account >>> saveAccounts
-  pure unit
 
 encryptWithScreenLock :: String -> String -> Aff (Either Error String)
 encryptWithScreenLock  serviceName data' =
