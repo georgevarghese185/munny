@@ -7,10 +7,10 @@ import Prelude
 import App ((<|>))
 import App.Interface.Events (Event(..), on)
 import App.Interface.SecureDevice (DeviceSecureStatus(..), KeyAlias(..), isDeviceSecure, secureEncrypt)
-import App.Interface.Storage (store)
 import App.Plugin (loadPlugin)
 import App.Plugin.UI (wait)
 import Control.Monad.Except (ExceptT, lift, runExceptT, throwError)
+import Data.Array (snoc)
 import Data.Bifunctor (bimap)
 import Data.Either (Either(..), either)
 import Data.Maybe (Maybe(..))
@@ -22,6 +22,7 @@ import Foreign (Foreign)
 import Foreign.Generic (encodeJSON)
 import Node.Crypto.Cipher (Algorithm(..))
 import Node.Crypto.Cipher as Cipher
+import Plugin.Home.Account (getAccounts, saveAccounts)
 import Plugin.Home.Keys as Keys
 import Plugin.Home.UI.HomeScreen (HomeScreenUi)
 import Plugin.Home.UI.HomeScreen as Events
@@ -104,7 +105,7 @@ encryptSettings ui back serviceSettings serviceName = backable do
   encryptedSettings <- lift $ encryptFn $ encodeJSON serviceSettings
   case encryptedSettings of
     Right s -> do
-      lift $ store (Keys.serviceSettings serviceName) (encodeJSON s)
+      lift $ createAccount ui chooseAgain serviceName s
       lift $ UI.showSimpleDialog ui "Account added"
       lift (wait ui Events.okClicked)
       lift $ UI.hideSimpleDialog ui
@@ -112,6 +113,21 @@ encryptSettings ui back serviceSettings serviceName = backable do
       lift $ UI.showSimpleDialog ui ("Error while encrypting: " <> E.message e)
       lift $ (wait ui Events.okClicked)
       lift $ UI.hideSimpleDialog ui
+      lift $ chooseAgain
+
+createAccount :: HomeScreenUi -> (Aff Unit) -> String -> String -> Aff Unit
+createAccount ui back serviceName encryptedSettings = backable do
+  lift $ UI.showTextInputDialog ui "Name this account" "text"
+  name <- lift (wait ui Events.textEntered) <|> onBack (UI.hideTextInputDialog ui *> back)
+  lift $ UI.hideTextInputDialog ui
+  let account = {
+        name
+      , serviceName
+      , serviceSettings: encryptedSettings
+      , summary: []
+      , lastUpdated: Nothing
+      }
+  lift $ getAccounts >>= flip snoc account >>> saveAccounts
   pure unit
 
 encryptWithScreenLock :: String -> String -> Aff (Either Error String)

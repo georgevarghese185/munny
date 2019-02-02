@@ -18,6 +18,7 @@ import Plugin.Home (pluginName)
 import Plugin.Home.AddAccount (addAccount)
 import Plugin.Home.UI.HomeScreen (HomeScreenUi, startHomeScreen)
 import Plugin.Home.UI.HomeScreen as Events
+import Plugin.Home.UI.HomeScreen as UI
 import Simple.JSON (read)
 
 type Params = {
@@ -45,6 +46,7 @@ start params = do
 homeScreen :: HomeScreenUi -> Aff Unit
 homeScreen ui = do
   -- on BackPressed (liftEffect exit) <|> wait ui Events.addAccountClicked
+  UI.refreshAccounts ui
   wait ui Events.addAccountClicked
   services <- getServices
   addAccount ui (unwrap >>> _.name <$> services)

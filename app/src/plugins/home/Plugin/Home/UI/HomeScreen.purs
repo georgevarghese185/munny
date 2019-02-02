@@ -5,39 +5,35 @@ import Prelude
 import App (appName)
 import App.Plugin.UI (Ui, modifyState, newEvent, newUi, onStateUpdate, updateState)
 import Control.Monad.Except (runExcept)
+import Data.DateTime (DateTime, diff)
 import Data.Either (Either(..))
 import Data.Generic.Rep (class Generic)
-import Data.Maybe (Maybe(..), maybe)
+import Data.Int (floor)
+import Data.Maybe (Maybe(..), fromMaybe, maybe)
+import Data.Newtype (unwrap)
 import Data.Symbol (SProxy(..))
+import Data.Time.Duration (Days(..), Hours(..), Minutes(..), Seconds(..))
 import Effect (Effect)
 import Effect.Aff (Aff)
+import Effect.Class (liftEffect)
 import Effect.Class.Console (errorShow)
+import Effect.Now (nowDateTime)
 import Effect.Uncurried (EffectFn1, EffectFn2, mkEffectFn2, runEffectFn1, runEffectFn2)
 import Foreign (F, Foreign, unsafeToForeign)
 import Foreign.Class (class Decode, class Encode, decode)
-import Foreign.Generic (defaultOptions, genericDecode, genericEncode)
+import Foreign.Generic (defaultOptions, encodeJSON, genericDecode, genericEncode)
 import Plugin.Home (pluginDir)
+import Plugin.Home.Account (AccountSummary, getAccounts)
 import Record (modify, set)
 import Simple.JSON (write)
 
 foreign import startHomeScreenImpl :: EffectFn2 String (EffectFn2 String (Array Foreign) Unit) (EffectFn1 Foreign Unit)
 
-type AccountSummary = {
-  leftColumn :: Maybe {
-    label :: String
-  , value :: String
-  }
-, rightColumn :: Maybe {
-    label :: String
-  , value :: String
-  }
-}
-
 type Account = {
   name :: String
 , logo :: String
 , lastUpdated :: String
-, summaryRows :: Array AccountSummary
+, summary :: Array AccountSummary
 }
 
 type SyncingAccount = {
@@ -113,6 +109,18 @@ _name = SProxy :: SProxy "name"
 _logo = SProxy :: SProxy "logo"
 _sync = SProxy :: SProxy "sync"
 _status = SProxy :: SProxy "status"
+
+refreshAccounts :: HomeScreenUi -> Aff Unit
+refreshAccounts ui = do
+  accounts <- getAccounts
+  now <- liftEffect nowDateTime
+  let uiAccounts = map (\a -> {
+        name: a.name,
+        logo: a.serviceName <> "/assets/logo.png",
+        lastUpdated: fromMaybe "Never" $ renderLastUpdated now <$> a.lastUpdated,
+        summary: a.summary
+      }) accounts
+  modifyState ui $ set _accounts uiAccounts
 
 hideSelectorDialog :: HomeScreenUi -> Aff Unit
 hideSelectorDialog ui =
@@ -278,6 +286,14 @@ decodeEvent eventName args = case runExcept $ decode' eventName args of
     decode' :: String -> Array Foreign -> F a
     decode' e [a] = decode $ unsafeToForeign {tag: e, contents: a}
     decode' e as = decode $ unsafeToForeign {tag: e, contents: as}
+
+renderLastUpdated :: DateTime -> DateTime -> String
+renderLastUpdated now date
+  | diff now date >= (Days 1.0) = encodeJSON $ floor $ unwrap $ (diff now date :: Days)
+  | diff now date >= (Hours 1.0) = encodeJSON $ floor $ unwrap $ (diff now date :: Hours)
+  | diff now date >= (Minutes 1.0) = encodeJSON $ floor $ unwrap $ (diff now date :: Minutes)
+  | diff now date >= (Seconds 1.0) = encodeJSON $ floor $ unwrap $ (diff now date :: Seconds)
+  | otherwise = "Just now"
 
 startHomeScreen :: String -> Effect HomeScreenUi
 startHomeScreen rootId = do

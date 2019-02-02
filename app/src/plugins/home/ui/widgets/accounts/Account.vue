@@ -2,13 +2,13 @@
 
   <div class="account-container clickable" @click="summaryOpen = !summaryOpen">
     <div class="account">
-      <img class="account-logo" :src="`${app.pluginDir}/assets/${account.logo}`"/>
+      <img class="account-logo" :src="account.logo"/>
       <p class="account-name"> {{account.name}} </p>
       <p class="last-updated light-text"> Last updated: {{account.lastUpdated}} </p>
     </div>
     <transition name="roll">
-      <div v-if="account.summaryRows.length > 0 && summaryOpen" class="summary">
-        <div v-for="row in account.summaryRows" class="summary-row">
+      <div v-if="summaryRows.length > 0 && summaryOpen" class="summary">
+        <div v-for="row in summaryRows" class="summary-row">
           <div class="summary-column">
             <p class="summary-item-label"> {{row.leftColumn.label}} </p>
             <p class="summary-item-value"> {{row.leftColumn.value}} </p>
@@ -34,6 +34,36 @@
     data: function() {
       return {
         summaryOpen: false
+      }
+    },
+    computed: {
+      summaryRows: function() {
+        var rows = [];
+        this.account.summary.map((section, i) => {
+          var empty = {label: "", value: ""}
+          rows.push({
+            leftColumn: {
+              label: section.sectionName,
+              value: section.sectionValue
+            },
+            rightColumn: empty
+          });
+          section.details.map((d, j) => {
+            var rightColumn = {
+              label: d.name,
+              value: d.value
+            }
+            if(j == 0) {
+              rows[i].rightColumn = rightColumn;
+            } else {
+              rows.push({
+                leftColumn: empty,
+                rightColumn
+              })
+            }
+          })
+        })
+        return rows;
       }
     },
     props: ["app", "account"]
