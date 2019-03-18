@@ -1,8 +1,8 @@
 {
   "name": "hdfc",
-  "type": ["account-service", "bank"],
-  "inputs": ["ui", "serviceAccountSettings"],
-  "outputs": ["serviceAccountSettings", "serviceAccounts"],
+  "type": ["service", "bank"],
+  "inputs": ["ui", "serviceSettings"],
+  "outputs": ["serviceSettings", "dataTables"],
   "build": {
     "entry": "Plugin.HDFC.Main",
     "type": "purs"

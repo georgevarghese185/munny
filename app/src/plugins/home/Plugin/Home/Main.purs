@@ -32,7 +32,7 @@ main = pluginReady pluginName start
 
 getServices :: Aff (Array Plugin)
 getServices = do
-  either throwError pure =<< (runExceptT $ getPluginsByType "account-service")
+  either throwError pure =<< (runExceptT $ getPluginsByType "service")
 
 start :: Foreign -> Aff Foreign
 start params = do

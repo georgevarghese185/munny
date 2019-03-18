@@ -23,7 +23,7 @@ import Simple.JSON (read, write)
 type Params = {
   inputs :: {
     ui :: Maybe String,
-    serviceAccountSettings :: Maybe HdfcSettings
+    serviceSettings :: Maybe HdfcSettings
   },
   outputs :: Array String
 }
@@ -43,13 +43,13 @@ settingsRequest fgn = do
   (p :: Params) <- case read fgn of
     Right inputs' -> pure inputs'
     Left e -> throwError $ error $ show e
-  if elem "serviceAccountSettings" p.outputs
+  if elem "serviceSettings" p.outputs
     then pure unit
     else throwError $ error "Unknown request"
   divId <- case p.inputs.ui of
     Just id -> pure id
     Nothing -> throwError $ error "No UI provided for settings request"
-  let currentSettings = p.inputs.serviceAccountSettings
+  let currentSettings = p.inputs.serviceSettings
   ui <- liftEffect $ startSettingsScreen divId currentSettings
   settings <- wait ui settingsDone
   pure $ write settings
@@ -59,8 +59,11 @@ syncRequest fgn = do
   (p :: Params) <- case read fgn of
     Right inputs' -> pure inputs'
     Left e -> throwError $ error $ show e
-  if elem "accounts" p.outputs
+  if elem "dataTables" p.outputs
     then pure unit
     else throwError $ error "Unknown request"
+  settings <- case p.inputs.serviceSettings of
+    Just s -> pure s
+    Nothing -> throwError $ error "Missing settings"
   
   pure fgn
