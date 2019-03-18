@@ -22,7 +22,7 @@ import Simple.JSON (read, write)
 
 type Params = {
   inputs :: {
-    ui :: String,
+    ui :: Maybe String,
     serviceAccountSettings :: Maybe HdfcSettings
   },
   outputs :: Array String
@@ -46,7 +46,21 @@ settingsRequest fgn = do
   if elem "serviceAccountSettings" p.outputs
     then pure unit
     else throwError $ error "Unknown request"
+  divId <- case p.inputs.ui of
+    Just id -> pure id
+    Nothing -> throwError $ error "No UI provided for settings request"
   let currentSettings = p.inputs.serviceAccountSettings
-  ui <- liftEffect $ startSettingsScreen p.inputs.ui currentSettings
+  ui <- liftEffect $ startSettingsScreen divId currentSettings
   settings <- wait ui settingsDone
   pure $ write settings
+
+syncRequest :: Foreign -> Aff Foreign
+syncRequest fgn = do
+  (p :: Params) <- case read fgn of
+    Right inputs' -> pure inputs'
+    Left e -> throwError $ error $ show e
+  if elem "accounts" p.outputs
+    then pure unit
+    else throwError $ error "Unknown request"
+  
+  pure fgn
