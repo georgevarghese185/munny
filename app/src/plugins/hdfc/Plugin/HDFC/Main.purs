@@ -23,7 +23,8 @@ import Simple.JSON (read, write)
 type Params = {
   inputs :: {
     ui :: Maybe String,
-    serviceSettings :: Maybe HdfcSettings
+    serviceSettings :: Maybe HdfcSettings,
+    onEvent :: Foreign
   },
   outputs :: Array String
 }
@@ -65,5 +66,5 @@ syncRequest fgn = do
   settings <- case p.inputs.serviceSettings of
     Just s -> pure s
     Nothing -> throwError $ error "Missing settings"
-  
+
   pure fgn

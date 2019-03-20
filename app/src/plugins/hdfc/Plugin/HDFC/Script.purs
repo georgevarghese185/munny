@@ -80,7 +80,13 @@ openEnquiry = try "{{interface}}.onCommandDone(e);"
   """
     var leftMenu = document.getElementsByName("left_menu")[0];
     var leftMenuDoc = leftMenu.contentDocument;
-    var enquireButton = leftMenuDoc.getElementById("enquiryatag")
+    var enquireButton = leftMenuDoc.getElementById("enquiryatag");
+    var observer = new MutationObserver(function() {
+    	observer.disconnect();
+    	{{interface}}.onCommandDone(true);
+    });
+    var enquiryTab = leftMenuDoc.querySelector('#enquirytab');
+    observer.observe(enquiryTab, {attributes:true, subtree: true});
     enquireButton.click();
   """
 
@@ -91,13 +97,17 @@ selectAccountBalance = try "{{interface}}.onCommandDone(e);"
     var leftMenuDoc = leftMenu.contentDocument;
     var enquireButton = leftMenuDoc.getElementById("enquiryatag")
     var viewBalanceButton = leftMenuDoc.getElementById("SBI_nohref");
+    var mainFrame = document.getElementsByName("main_part")[0];
+    mainFrame.addEventListener('load', function() {
+      {{interface}}.onCommandDone(true);
+    })
     viewBalanceButton.click();
   """
 
 getBalances :: String
 getBalances = try "{{interface}}.onCommandDone(e);"
   """
-    var mainFrame = document.getElementsByName("main_part")[0]
+    var mainFrame = document.getElementsByName("main_part")[0];
     var mainDoc = mainFrame.contentDocument;
     var accountType = mainDoc.getElementsByName("selAccttype")[0];
     accountType.value = "SCA";
@@ -117,7 +127,7 @@ getBalances = try "{{interface}}.onCommandDone(e);"
               var balance = balanceRow.children[1].innerHTML.replace(/<script(.*\\n)*.*<\\/script>/,"").replace(/,/g, "");
               resolve({account: accountNum, balance});
           }
-          mainFrame.addEventListener('load', frameLoad)
+          mainFrame.addEventListener('load', frameLoad);
           viewButton.click();
         })
         account.dispatchEvent(new Event('change'));
