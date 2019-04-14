@@ -1,10 +1,10 @@
 {
   "name": "test",
-  "type": [],
+  "type": ["boot"],
   "inputs": [],
   "outputs": [],
   "build": {
-    "entry": "App.Test.Main",
+    "entry": "App.Test.Plugin.HDFC",
     "type": "purs"
   }
 }

@@ -2,10 +2,15 @@ module Plugin.HDFC.Script where
 
 import Prelude
 
+import App.Interface.WebScripter (Script(..), ScriptStep(..))
 import Data.Argonaut.Core as JSON
+import Data.Bifunctor (bimap)
+import Data.Foldable (foldl)
+import Data.String (Pattern(..), Replacement(..), replace)
+import Data.Tuple (Tuple(..))
 
 submitUsername :: String
-submitUsername = try "{{interface}}.onCommandDone(e)"
+submitUsername = try "Interface.onCommandDone(e)"
   """
     var loginFrame = document.getElementsByName("login_page")[0]
     var loginDoc = loginFrame.contentDocument;
@@ -13,12 +18,12 @@ submitUsername = try "{{interface}}.onCommandDone(e)"
     userId.value = "{{username}}";
     var anchors = Array.from(loginDoc.getElementsByTagName("a"));
     var continueButton = anchors.filter(a => a.getAttribute("onclick") && a.getAttribute("onclick").match(/fLogon\(\)/))[0];
-    loginFrame.addEventListener("load", () => {{interface}}.onCommandDone());
+    loginFrame.addEventListener("load", () => Interface.onCommandDone());
     continueButton.click();
   """
 
 submitPassword :: String
-submitPassword = try "{{interface}}.onCommandDone(e)"
+submitPassword = try "Interface.onCommandDone(e)"
   """
     var loginFrame = document.getElementsByName("login_page")[0]
     var loginDoc = loginFrame.contentDocument;
@@ -32,15 +37,15 @@ submitPassword = try "{{interface}}.onCommandDone(e)"
   """
 
 isOtpPage :: String
-isOtpPage = try "{{interface}}.onCommandDone(\"false\")"
+isOtpPage = try "Interface.onCommandDone(\"false\")"
   """
     var isOtpPage = document.getElementsByName("fldMobile").length > 0;
-    {{interface}}.onCommandDone(isOtpPage.toString());
+    Interface.onCommandDone(isOtpPage.toString());
   """
 
 
 fireOtp :: String
-fireOtp = try "{{interface}}.onCommandDone(e)"
+fireOtp = try "Interface.onCommandDone(e)"
   """
     var mobileCheck = document.getElementsByName("fldMobile")[0];
     mobileCheck.checked = true;
@@ -50,14 +55,14 @@ fireOtp = try "{{interface}}.onCommandDone(e)"
   """
 
 isOtpEntryPage :: String
-isOtpEntryPage = try "{{interface}}.onCommandDone(\"false\")"
+isOtpEntryPage = try "Interface.onCommandDone(\"false\")"
   """
     var isOTPEntryPage = document.getElementsByName("fldOtpToken").length > 0;
-    {{interface}}.onCommandDone(isOTPEntryPage.toString());
+    Interface.onCommandDone(isOTPEntryPage.toString());
   """
 
 submitOtp :: String
-submitOtp = try "{{interface}}.onCommandDone(e)"
+submitOtp = try "Interface.onCommandDone(e)"
   """
     var otpField = document.getElementsByName("fldOtpToken")[0];
     otpField.value = "{{otp}}";
@@ -67,23 +72,28 @@ submitOtp = try "{{interface}}.onCommandDone(e)"
   """
 
 isNBHome :: String
-isNBHome = try "{{interface}}.onCommandDone(\"false\");"
+isNBHome = try "Interface.onCommandDone(\"false\");"
   """
     var mainFrame = document.getElementsByName("main_part")[0]
     var mainDoc = mainFrame.contentDocument;
     var isNBHome = mainDoc.getElementsByClassName("PSMSubHeader").length > 0
-    {{interface}}.onCommandDone(isNBHome.toString());
+    if(isNBHome) {
+      this.openEnquiry();
+    } else {
+      Interface.onCommandDone("Not netbanking Home page");
+    }
   """
 
 openEnquiry :: String
-openEnquiry = try "{{interface}}.onCommandDone(e);"
+openEnquiry = try "Interface.onCommandDone(e);"
   """
+    var _this = this;
     var leftMenu = document.getElementsByName("left_menu")[0];
     var leftMenuDoc = leftMenu.contentDocument;
     var enquireButton = leftMenuDoc.getElementById("enquiryatag");
     var observer = new MutationObserver(function() {
     	observer.disconnect();
-    	{{interface}}.onCommandDone(true);
+    	_this.selectAccountBalance();
     });
     var enquiryTab = leftMenuDoc.querySelector('#enquirytab');
     observer.observe(enquiryTab, {attributes:true, subtree: true});
@@ -91,21 +101,22 @@ openEnquiry = try "{{interface}}.onCommandDone(e);"
   """
 
 selectAccountBalance :: String
-selectAccountBalance = try "{{interface}}.onCommandDone(e);"
+selectAccountBalance = try "Interface.onCommandDone(e);"
   """
+    var _this = this;
     var leftMenu = document.getElementsByName("left_menu")[0];
     var leftMenuDoc = leftMenu.contentDocument;
     var enquireButton = leftMenuDoc.getElementById("enquiryatag")
     var viewBalanceButton = leftMenuDoc.getElementById("SBI_nohref");
     var mainFrame = document.getElementsByName("main_part")[0];
     mainFrame.addEventListener('load', function() {
-      {{interface}}.onCommandDone(true);
+      _this.getBalances();
     })
     viewBalanceButton.click();
   """
 
 getBalances :: String
-getBalances = try "{{interface}}.onCommandDone(e);"
+getBalances = try "Interface.onCommandDone(e);"
   """
     var mainFrame = document.getElementsByName("main_part")[0];
     var mainDoc = mainFrame.contentDocument;
@@ -133,11 +144,66 @@ getBalances = try "{{interface}}.onCommandDone(e);"
         account.dispatchEvent(new Event('change'));
       }));
       Promise.all(balanceTasks).then(balances => {
-        {{interface}}.onCommandDone(JSON.stringify(balances));
+        Interface.onCommandDone(JSON.stringify(balances));
       });
     })
     accountType.dispatchEvent(new Event('change'));
   """
+
+getAccountBalances :: String
+getAccountBalances =
+  wrapInFunction $ foldl (\s (Tuple p r) -> replace p r s) startScript replacements
+  where
+    startScript :: String
+    startScript =
+      """
+        var scripts = {
+          isNBHome: function() {
+            {{isNBHome}}
+          },
+          openEnquiry: function() {
+            {{openEnquiry}}
+          },
+          selectAccountBalance: function() {
+            {{selectAccountBalance}}
+          },
+          getBalances: function() {
+            {{getBalances}
+          }}
+        }
+
+        scripts.isNBHome();
+      """
+    replacements :: Array (Tuple Pattern Replacement)
+    replacements = [
+      Tuple "isNBHome" isNBHome,
+      Tuple "openEnquiry" openEnquiry,
+      Tuple "selectAccountBalance" selectAccountBalance,
+      Tuple "getBalances" getBalances
+    ] <#> bimap (\pattern -> Pattern $ "{{" <> pattern <> "}}") Replacement
+
+
+
+loginScript :: String -> String -> Script
+loginScript username password = Script [
+  URL "https://netbanking.hdfc.com/netbanking"
+, JS $ replace (Pattern "{{username}}") (Replacement username) submitUsername
+, JS $ replace (Pattern "{{password}}") (Replacement password) submitPassword
+, JS isOtpPage
+]
+
+sendOtpScript :: Script
+sendOtpScript = Script [ JS fireOtp, JS isOtpPage ]
+
+submitOtpScript :: String -> Script
+submitOtpScript otp = Script [
+  JS $ replace (Pattern "{{otp}}") (Replacement otp) submitOtp
+]
+
+accountBalancesScript :: Script
+accountBalancesScript = Script [
+  JS getAccountBalances
+]
 
 try :: String -> String -> String
 try catchSnippet jsSnippet =

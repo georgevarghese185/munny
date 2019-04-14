@@ -1,6 +1,6 @@
 {
   "name": "boot",
-  "type": ["boot"],
+  "type": [],
   "inputs": [],
   "outputs": [],
   "build": {
